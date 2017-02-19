@@ -1,0 +1,826 @@
+%% AMS-LaTeX Created with the Wolfram Language : www.wolfram.com
+
+\documentclass{article}
+\usepackage{amsmath, amssymb, graphics, setspace}
+
+\newcommand{\mathsym}[1]{{}}
+\newcommand{\unicode}[1]{{}}
+
+\newcounter{mathematicapage}
+\begin{document}
+
+\title{Making the Most of Available Data}
+\author{}
+\date{}
+\maketitle
+
+\subsection*{Simulation can help when data are sparse or uncertainty runs high. Here are four examples. I{'}ve left all the code in place so you
+can see it; you can safely ignore it without losing the thread.}
+
+\section*{Using Small Samples to Estimate a Median Value}
+
+It{'}s easy to fixate on measuring things accurately. But if we step back a moment we{'}d realize that in many instances, we don{'}t need to be that
+accurate. All we need to know is if the thing we{'}re trying to measure is smaller or larger than a certain threshold. In these situations, we can
+do magic with small amounts of data! \\
+\\
+Here{'}s an example from Douglas Hubbard{'}s book, \textit{ How to Measure Anything}. I{'}ve revised it a bit for our purposes.\\
+\\
+A group of herders (let{'}s say there are a total of 200 of them) walk long distances in hostile territory to procure their daily supply of potable
+water. If the bulk of the group spends more than 8 hours a day procuring water, then we need to invest in keeping them safe. \\
+\\
+The only available data on the group is from researchers who spent some time with just 7 members of the group. From this work we know that { }of
+the 7 members each spent (on average) the following number of hours each day procuring water: 6, 11, 8, 4, 9, 12, 16. That{'}s it for the available
+data.\\
+\\
+\pmb{ Decision Criterion: If more than half of the group spends more than 8 hours a day procuring water, then they need more protection.}\\
+\\
+To make a decision we need to know the median time spent procuring water. If the median is above 8 hours, we act, if it isn{'}t, we don{'}t. Given
+our 7 data points, can we estimate the median? \\
+\\
+The first thing to realize is that it{'}s almost certain that the median is somewhere between the lowest and the highest value. How certain? Well,
+with 7 data points, we can be more than 99$\%$ certain that the median is somewhere between 4 and 16.
+
+\begin{doublespace}
+\noindent\(\pmb{\text{cert}[\text{pSuccess$\_$} , \text{nSuccessinarow$\_$}]\text{:=} 1 - \text{pSuccess}{}^{\wedge}\text{nSuccessinarow};}\\
+\pmb{\text{cert2} = \text{PDF}[\text{BinomialDistribution}[6, 0.5],x];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{1-\text{Table}[\text{cert2}, \{x,0,7\}]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\{0.984375,0.90625,0.765625,0.6875,0.765625,0.90625,0.984375,1\}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{Tooltip}[\text{DiscretePlot}[\text{cert2}, \{x,0,7\},\text{PlotRange}\to \text{All}, \text{PlotMarkers}\to \text{Automatic}],
+}\\
+\pmb{\text{Evaluate}[\text{cert2}[x]]]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{cert}[0.5,6]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(0.984375\)
+\end{doublespace}
+
+Here{'}s how to think about it. When you pick a member from the group, there{'}s a fifty-fifty chance that they{'}ll be above (or below) the median
+value. That{'}s what the median means. So picking someone is like tossing a coin; if they are over the median value then imagine they{'}re tails
+and if they are under the median value then imagine they{'}re heads. So, when a coin is tossed 7 times, the chance of getting all heads (i.e. all
+values below the median) or all tails (i.e. all values above the median) is less than 1$\%$ -- it{'}s about 0.78$\%$. 
+
+That{'}s nice, but can we do better? If the median is really 8, how likely are the values we got? Let{'}s assume that the values are normally distributed
+but there{'}s a lot of variation (4 and 16 gives us a sense that the spread isn{'}t small). { }
+
+Let{'}s simulate picking 7 values from a normal distribution that has a mean (and hence a median too) of 8 and a standard deviation of 4. We generate
+10,000 such sets of 7 values picked at random from the normal distribution we{'}ve specified.
+
+\begin{doublespace}
+\noindent\(\pmb{\text{samples} = \text{Table}[\text{RandomVariate}[\text{NormalDistribution}[8,4],7], \{10000\}];}\)
+\end{doublespace}
+
+How many of these samples have a spread of 12 or greater (i.e. 16 - 4)?
+
+\begin{doublespace}
+\noindent\(\pmb{\text{diffs} = \text{Count}[\text{Max}[\#] - \text{Min}[\#] \& \text{/@} \text{samples}, \text{x$\_$}\text{/;} x \geq \text{  }12]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(3373\)
+\end{doublespace}
+
+So what{'}s the chance that we see what we see given that the median value is 8 or higher? The answer is: 
+
+\begin{doublespace}
+\noindent\(\pmb{\text{medianChance} = \text{diffs}/10000 \text{//}N}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(0.3373\)
+\end{doublespace}
+
+So there{'}s around a 33$\%$ chance that our group{'}s median is 8 or above. That{'}s the best we can do with the sample we have, but at least it
+was something.
+
+\section*{Estimating Corruption Level - Using Small Samples to Make Large Reductions in Uncertainty}
+
+We{'}re trying to assess the level of corruption in a particular government institution. There are only a few studies out there and data is hard
+to come by. Let{'}s measure corruption level in the same way we measure customer satisfaction. Suppose 100 people who have interacted with the institution.
+If 90$\%$ encountered one or more corrupt practices (assuming we{'}ve defined and listed the set of corrupt practices) we say the corruption level
+of the institution is 90$\%$.\\
+\\
+Based on some background knowledge, we reckon that the institution{'}s corruption level is somewhere between 50$\%$ to 90$\%$. It{'}s not below 50$\%$
+and it{'}s very unlikely to be above 90$\%$. Since we can{'}t yet distinguish if it{'}s 50$\%$ or 90$\%$, we attribute the same probability of 0.2
+to each level of corruption. \\
+\\
+\pmb{ Decision Criterion: Take action when the corruption level is at or greater than 70$\%$. \\
+}\\
+We{'}d like to use some data to get a bit more certain about our beliefs. How much can a 20-person poll (randomly selected, of course) reduce our
+uncertainty?\\
+\\
+We begin by considering a virtual experiment. If the corruption level is indeed 90$\%$, what{'}s the probability that in a poll of 20 people, 18
+of them (i.e. 90$\%$) will say they encountered corruption? We can simulate this.
+
+\begin{doublespace}
+\noindent\(\pmb{\text{likelihood2}[\text{popProb$\_$}, \text{sampleSize$\_$}]\text{:=} }\\
+\pmb{\text{Module}[\{\text{popSize} = 10000,\text{population},\text{nTrials} = 1000, \text{hitValue} = 1,\text{samples}, }\\
+\pmb{\text{counts}, \text{hits}, \text{likelys}\},}\\
+\pmb{\text{(*} \text{Estimates} \text{the} \text{likelihood} \text{of} a \text{sample} \text{of} \text{size} \text{sampleSize} \text{returning} \text{nHits}
+}\\
+\pmb{\text{from} a \text{population}. \text{The} \text{likelihood} \text{is} \text{estimated} \text{over} \text{nTrials}. \text{*)}}\\
+\pmb{\text{population} = \text{BernoulliDistribution}[\text{popProb}];}\\
+\pmb{\text{samples} = \text{Table}[\text{RandomChoice}[\text{RandomVariate}[\text{population}, \text{popSize}], \text{sampleSize}], }\\
+\pmb{\{\text{nTrials}\}];}\\
+\pmb{\text{(*} \text{For} \text{each} \text{element} \text{in} \text{sample}, \text{count} \text{the} \text{number} \text{of} \text{hits} \text{*)}}\\
+\pmb{\text{counts} = \text{Count}[\#, \text{hitValue}] \& \text{/@} \text{samples};}\\
+\pmb{\text{(*} \text{When} \text{the} \text{sample} \text{size} \text{is} N, \text{theoretically}, }\\
+\pmb{\text{the} \text{number} \text{of} \text{counts} \text{of} \text{the} \text{hit} \text{value} \text{can} \text{be} \text{anywhere} \text{from}
+0 \text{to} N. \text{*)}}\\
+\pmb{\text{(*} \text{Find} \text{the} \text{number} \text{of} \text{times} \text{we} \text{have} 0 \text{hits}, 1 \text{hit}, 2 \text{hits}, \text{...},
+N \text{hits} \text{*)}}\\
+\pmb{\text{hits} = \text{Count}[\text{counts}, \#]\& \text{/@} \text{Range}[\text{sampleSize}];}\\
+\pmb{\text{likelys} = \text{hits}/\text{nTrials} \text{//}N;}\\
+\pmb{\text{(*} \text{To} \text{make} \text{the} \text{ouput} \text{more} \text{readable}, }\\
+\pmb{\text{render} \text{it} \text{in} \text{the} \text{form} \{\{1,\text{p1}\},\{2, \text{p2}\}, \text{...} \{\text{sampleSize}, \text{psampleSize}\}\}
+\text{where} }\\
+\pmb{\text{the} \text{first} \text{element} \text{is} \text{the} \text{number} \text{of} \text{hits} \text{and} \text{the} \text{second} \text{element}
+\text{is} \text{the} }\\
+\pmb{\text{likelihood} \text{of} \text{getting} \text{this} \text{many} \text{hits}. \text{*)}}\\
+\pmb{\text{Transpose}[\{\text{Range}[\text{sampleSize}],\text{likelys}\}]}\\
+\pmb{];}\)
+\end{doublespace}
+
+At the risk of not rolling our own, likelihood2 is also given by the Binomial Distribution with n = 20 and p = 0.9
+
+\begin{doublespace}
+\noindent\(\pmb{\text{Range}[1,20]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20\}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{likelihood3} = \text{Probability}[x == \#,x \unicode{f3d2}\text{BinomialDistribution}[20,0.9]] \& \text{/@} \text{Range}[1,20]
+}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\{\text{1.799999999999989$\grave{ }$*${}^{\wedge}$-18},\text{1.5389999999999938$\grave{ }$*${}^{\wedge}$-16},\text{8.310599999999983$\grave{
+}$*${}^{\wedge}$-15},\text{3.1788044999999865$\grave{ }$*${}^{\wedge}$-13},\text{9.154956959999962$\grave{ }$*${}^{\wedge}$-12},\text{2.0598653159999982$\grave{
+}$*${}^{\wedge}$-10},\text{3.707757568799986$\grave{ }$*${}^{\wedge}$-9},\text{5.4225954443699406$\grave{ }$*${}^{\wedge}$-8},\text{6.507114533243984$\grave{
+}$*${}^{\wedge}$-7},\text{6.442043387911565$\grave{ }$*${}^{\wedge}$-6},0.0000527076,0.000355776,0.00197045,0.00886704,0.0319214,0.0897788,0.19012,0.28518,0.27017,0.121577\}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{ListPlot}[\text{likelihood3}]}\)
+\end{doublespace}
+
+\includegraphics{Small Data v2_gr1.eps}
+
+Here is the result of such a simulation. In a poll of 20 people it lists the probability of 1 person saying he or she encountered corruption, 2 people
+saying that they did, 3 people saying that they did, and so on all the way to all 20 people saying they encountered corruption -- given that the
+real rate of corruption is 90$\%$.
+
+\begin{doublespace}
+\noindent\(\pmb{\text{likelihood2}[0.9,20]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\{\{1,0.\},\{2,0.\},\{3,0.\},\{4,0.\},\{5,0.\},\{6,0.\},\{7,0.\},\{8,0.\},\{9,0.\},\{10,0.\},\{11,0.\},\{12,0.002\},\{13,0.001\},\{14,0.013\},\{15,0.043\},\{16,0.081\},\{17,0.204\},\{18,0.296\},\{19,0.26\},\{20,0.1\}\}\)
+\end{doublespace}
+
+And here is a plot of that simulation.
+
+\begin{doublespace}
+\noindent\(\pmb{\text{cp9s20} = \text{ListLinePlot}[\text{Tooltip}[\text{likelihood2}[0.9,20]], \text{PlotMarkers}\to \text{Automatic},}\\
+\pmb{\text{GridLines}\to  \{\text{Range}[20], \text{Table}[i,\{i,0, 0.35, 0.05\}]\}, }\\
+\pmb{\text{Ticks} \to  \{\text{Range}[20], \text{Table}[i,\{i,0, 0.35, 0.05\}]\},\text{PlotRange}\to  \{0,0.35\}, }\\
+\pmb{\text{ImageSize}\to 600, }\\
+\pmb{\text{AxesLabel}\to \{\text{{``}$\#$ corruption reports$\backslash $namongst 20 respondents{''}}, \text{{``}Probability of Result{''}}\}, }\\
+\pmb{\text{PlotLabel}\to \text{{``}Actual Corruption = 90$\%${''}}]}\)
+\end{doublespace}
+
+\includegraphics{Small Data v2_gr2.eps}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{ps20} = \text{likelihood2}[\#,20]\& \text{/@} \text{Range}[0.9,0.5,-0.1];}\)
+\end{doublespace}
+
+And here are the results of such a simulations for when the corruption level is really 90$\%$, 80$\%$, and so on all the way down to 50$\%$. So,
+if the real level of corruption is 50$\%$, how likely is it for 10 out of the 20 people sampled to say they encountered corruption? You can read
+it off the diagram below - it{'}s somewhere around 0.17 or thereabouts. (It{'}s much lower than you thought, isn{'}t it?)
+
+\begin{doublespace}
+\noindent\(\pmb{\text{cps20} = \text{ListLinePlot}[\text{Tooltip}[\text{ps20}], \text{PlotMarkers}\to \text{Automatic},}\\
+\pmb{\text{GridLines} \to  \{\text{Range}[20], \text{Table}[i, \{i,0,0.35, 0.05\}]\},}\\
+\pmb{\text{Ticks}\to  \{\text{Range}[20], \text{Table}[i, \{i,0,0.35, 0.05\}]\},\text{PlotRange}\to  \{0,0.35\}, }\\
+\pmb{\text{PlotLegends}\to \{\text{{``}90$\%${''}}, \text{{``}80$\%${''}}, \text{{``}70$\%${''}}, \text{{``}60$\%${''}}, \text{{``}50$\%${''}}\},
+\text{ImageSize}\to  600, }\\
+\pmb{\text{AxesLabel}\to \{\text{{``}$\#$ corruption reports$\backslash $namongst 20 respondents{''}}, \text{{``}Probability of Result{''}}\}, }\\
+\pmb{\text{PlotLabel}\to \text{{``}Actual Corruption Varying $\backslash $nfrom 90$\%$ to 50$\%${''}}]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\begin{array}{cc}
+  &  \\
+\end{array}\)
+\end{doublespace}
+
+Now you conduct your poll of 20 people and 14 of them say they{'}ve encountered corruption. You can use this small sample to revise your initial
+probabilities about the actual rate of corruption.\\
+\\
+Let{'}s see how the probability that the corruption level is 70$\%$ is changed by this evidence. Remember it used to be at 0.2. Has the evidence
+increased this probability or decreased it? 
+
+Here are the usual Bayesian manipulations....
+
+\begin{doublespace}
+\noindent\(\pmb{\text{prob14given70} = \text{likelihood2}[0.7,20][[14]][[2]]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(0.182\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{prob70} = 0.2;}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{prob14of20} = \text{Total}[(\text{likelihood2}[\#,20][[14]][[2]] * 0.2) \& \text{/@} \text{Range}[0.9,0.5,-0.1]]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(0.0862\)
+\end{doublespace}
+
+...which result in a revised probability for our 70$\%$ corruption hypothesis.
+
+\begin{doublespace}
+\noindent\(\pmb{\text{prob70given14of20} = (\text{prob14given70} * \text{prob70})/\text{prob14of20}}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(0.422274\)
+\end{doublespace}
+
+We see that the probability that corruption is 70$\%$ has increased from the prior level of 0.2 -- that{'}s quite a jump for a small sample of just
+20. But given this evidence, what has happened to the priority of corruption being 90$\%$? Let{'}s find out.
+
+\begin{doublespace}
+\noindent\(\pmb{\text{prob14given90} = \text{likelihood2}[0.9,20][[14]][[2]]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(0.007\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{prob90} = 0.2;}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{prob90given14of20} = (\text{prob14given90} * \text{prob90}) / \text{prob14of20}}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(0.0162413\)
+\end{doublespace}
+
+The probability that corruption is at 90$\%$ has dropped to about a tenth of its prior value. When uncertainty is large to begin with, it only takes
+a small amount of data to make large reductions in uncertainty. (That{'}s one of the counter-intuitive lessons about dealing with uncertainty.)\\
+\\
+Error correction methods for crowd sourced content at sites like Foursquare and Yelp (and aymta.com) use similar Bayesian updating techniques. These
+can also be used in the monitoring and evaluation of initiatives.
+
+\section*{Creative Prediction}
+
+Let{'}s say that government operatives use a number of different types of signals to communicate. You{'}d like to make a complete catalog of these
+signals. But you don{'}t know how many different types of signals there are. So you begin observing and listing the ones you see. How many observations
+would you need to make before you can be quite sure that you{'}ve seen all the different types of signals there are?\\
+\\
+This seems like such an open-ended problem. Is there a way to make progress on it? Some simulation will help us see an underlying pattern here that
+remains otherwise hidden. 
+
+\begin{doublespace}
+\noindent\(\pmb{\text{catsUncovered}[\text{nCategories$\_$}, \text{nObservations$\_$}]\text{:=} \text{Module}[\{\text{nRequirements} = 10000, }\\
+\pmb{\text{(*} \text{catsUncovered} \text{is} \text{the} \text{main} \text{function}. \text{For} a \text{given} \text{number} \text{of} \text{categories}
+}\\
+\pmb{\text{and} a \text{given} \text{number} \text{of} \text{observations}, }\\
+\pmb{\text{how} \text{many} \text{categories} \text{would} \text{you} \text{expect} \text{to} \text{observe}? \text{What} \text{percentage} \text{of}
+\text{the} }\\
+\pmb{\text{categories} \text{does} \text{this} \text{constitute}? \text{The} \text{function} \text{simulates} a \text{number} \text{of} }\\
+\pmb{\text{trials} \text{and} \text{takes} \text{the} \text{mean} \text{value} \text{of} \text{the} \text{categories} \text{uncovered} \text{as}
+\text{the} }\\
+\pmb{\text{answer}. \text{It} \text{also} \text{produces} \text{all} \text{the} \text{usual} \text{statistics} \text{on} \text{the} \text{trials}
+\text{--} \text{stddev}, }\\
+\pmb{\text{quartiles}, \text{etc}. \text{Each} \text{set} \text{of} \text{trials} \text{is} \text{set} \text{to} \text{be} \text{nRequirements} \text{long}.
+\text{The} }\\
+\pmb{\text{idea} \text{is} \text{that} \text{the} \text{total} \text{number} \text{of} \text{requirements} \text{will} \text{be} \text{some} \text{largish}
+\text{number}, }\\
+\pmb{\text{say} 10,000. \text{Within} \text{these} \text{requirements}, \text{the} \text{categories} \text{will} \text{be} \text{scattered} \text{randomly}.
+\text{*)}}\\
+\pmb{\text{nTrials} = 50,}\\
+\pmb{\text{seedRandomFlag} = 0,}\\
+\pmb{\text{series}, }\\
+\pmb{\text{obs}, }\\
+\pmb{\text{nCatsNotFound}, }\\
+\pmb{\text{nCatsFound}, }\\
+\pmb{\text{percentCatsFound},}\\
+\pmb{\text{percentStats},}\\
+\pmb{\text{numStats},}\\
+\pmb{\text{mean}, \text{stddev}, \text{quartiles}, \text{iqrange}, \min , \max  \},}\\
+\pmb{\text{(*} \text{Output} \text{is} \text{the} 2-\text{tuple} \text{of} \text{statistics} \text{for} \text{the} \text{mean} \text{percentage}
+\text{of} \text{categories} }\\
+\pmb{\text{uncovered} \text{and} \text{the} \text{mean} \text{number} \text{of} \text{categories} \text{uncovered} \text{*)}}\\
+\pmb{\text{(*} \text{generate} \text{the} \text{series} \text{nTrials} \text{times} \text{--} \text{categories} \text{randomly} \text{occurring}
+\text{in} }\\
+\pmb{\text{nRequirements} \text{*)}}\\
+\pmb{\text{(*} \text{Set} \text{SeedRandom} \text{to} \text{make} \text{sure} \text{that} \text{the} \text{same} \text{series} \text{is} \text{used}
+\text{in} \text{all} \text{trials} \text{--} }\\
+\pmb{i.e. \text{there} \text{is} \text{essentialy} \text{only} 1 \text{trial} \text{*)}}\\
+\pmb{\text{If}[\text{seedRandomFlag} == 1,\text{SeedRandom}[1]];}\\
+\pmb{\text{series} = \text{Table}[\text{RandomInteger}[\{1, \text{nCategories}\}, \text{nRequirements}], \{\text{nTrials}\}];}\\
+\pmb{\text{(* Take the first nObservations for each trial *)}}\\
+\pmb{\text{obs} = \text{Take}[\#, \text{nObservations}] \& \text{/@} \text{series};}\\
+\pmb{\text{(* Find the number of categories that are NOT present in the obs *)}}\\
+\pmb{\text{nCatsNotFound} = \text{Length}[\text{Complement}[\text{Range}[\text{nCategories}], \#]] \& \text{/@} \text{obs};}\\
+\pmb{\text{(* The number of categories found is total categories minus categories not found *)}}\\
+\pmb{\text{nCatsFound} = \text{nCategories} - \# \& \text{/@} \text{nCatsNotFound};}\\
+\pmb{\text{(* Percentage of categories found to total number of categories *)}}\\
+\pmb{\text{percentCatsFound} = N[\#/\text{nCategories}] \& \text{/@} \text{nCatsFound};}\\
+\pmb{\text{(* percentCatsFound statistics for the trials *)}}\\
+\pmb{\text{percentStats} = \{\text{mean}, \text{stddev}, \text{quartiles}, \text{iqrange}, \min , \max \} = }\\
+\pmb{\#[\text{percentCatsFound}] \& \text{/@} \{\text{Mean}, \text{StandardDeviation}, \text{Quartiles}, }\\
+\pmb{\text{InterquartileRange}, \text{Min}, \text{Max}\};}\\
+\pmb{\text{(* number of categories found statistics for the trials *)}}\\
+\pmb{\text{numStats} = \{\text{mean}, \text{stddev}, \text{quartiles}, \text{iqrange}, \min , \max \} = }\\
+\pmb{N[\#[\text{nCatsFound}]] \& \text{/@} \{\text{Mean}, \text{StandardDeviation}, \text{Quartiles}, \text{InterquartileRange}, }\\
+\pmb{\text{Min}, \text{Max}\};}\\
+\pmb{\{\text{percentStats}, \text{numStats}\}}\\
+\pmb{];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Percentage} \text{and} \text{number} \text{of} \text{categories} \text{uncovered} \text{in} n \text{observations}
+(\text{second} \text{argument})}\\
+\pmb{\text{if} \text{there} \text{are} a \text{total} \text{of} c \text{categories} (\text{first} \text{argument}) \text{*)}}\\
+\pmb{\text{catsUncovered}[20, 20]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\{\{0.628,0.0655899,\{0.6,0.65,0.65\},0.05,0.45,0.8\},\{12.56,1.3118,\{12.,13.,13.\},1.,9.,16.\}\}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Get} \text{data} \text{for} \text{tables} \text{and} \text{graphs} \text{--} \text{nCategories} \text{go} \text{from}
+20, 40, \text{...}, }\\
+\pmb{100 \text{and} \text{nObservations} \text{go} \text{from} 1 \text{to} 200. \text{For} \text{each} \text{data} \text{point}, }\\
+\pmb{\text{the} \text{mean} \text{percentage} \text{categories} \text{uncovered} \text{and} \text{the} \text{mean} \text{number} \text{of} \text{categories}
+}\\
+\pmb{\text{uncovered} \text{is} \text{output} \text{*)}}\\
+\pmb{t = \text{Table}[\text{Flatten}[\{i, j, \text{catsUncovered}[i,j] \}],\{i, 20, 100, 20\}, \{j, 1, 500\}];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Pull} \text{just} \text{the} \text{category}, \text{observations}, \text{mean} \text{percentage} \text{uncovered},
+}\\
+\pmb{\text{and} \text{the} \text{mean} \text{number} \text{uncovered} \text{*)}}\\
+\pmb{\text{t1} = \text{Table}[\{t[[i]][[j]][[1]], t[[i]][[j]][[2]], t[[i]][[j]][[3]], t[[i]][[j]][[11]]\}, }\\
+\pmb{\{i, 1,5\}, \{j, 1, 500\}];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(* Pull the mean number uncovered *)}}\\
+\pmb{\text{d1} = \#[[\text{All}, 4]] \& \text{/@} \text{t1};}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{g1} = \text{ListLinePlot}[\text{d1}, \text{PlotRange}\to \{\text{All}, \text{All}\}, \text{ImageSize}\to 600, }\\
+\pmb{\text{AxesLabel}\to \{\text{{``}$\#$ Observations Made{''}}, \text{{``}$\#$ Categories Uncovered{''}}\}, \text{GridLines}\to \text{Automatic},
+}\\
+\pmb{\text{PlotLegends} \to \{\text{{``}20 Categories{''}}, \text{{``}40 Categories{''}},\text{{``}60 Categories{''}},\text{{``}80 Categories{''}},}\\
+\pmb{\text{{``}100 Categories{''}}\}]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\begin{array}{cc}
+  &  \\
+\end{array}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(* Pull the mean percentage uncovered *)}}\\
+\pmb{\text{d2} = \#[[\text{All}, 3]] \& \text{/@} \text{t1};}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{g2} = \text{ListLinePlot}[\text{d2}, \text{PlotRange}\to \{\text{All}, \text{All}\}, \text{ImageSize}\to 700, }\\
+\pmb{\text{AxesLabel}\to \{\text{{``}$\#$ Observations Made{''}}, \text{{``}$\%$ of Categories Uncovered{''}}\}, }\\
+\pmb{\text{GridLines}\to \text{Automatic}, }\\
+\pmb{\text{PlotLegends} \to \{\text{{``}20 Categories{''}}, \text{{``}40 Categories{''}},\text{{``}60 Categories{''}},\text{{``}80 Categories{''}},}\\
+\pmb{\text{{``}100 Categories{''}}\}]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\begin{array}{cc}
+  &  \\
+\end{array}\)
+\end{doublespace}
+
+Looking at the plot above, you can reason as follows. I don{'}t know the total number of distinct signals (the number of categories) that the government
+operatives are using. However, I{'}ve now made 200 observations and for the past 100 of these observations I have not seen anything new. That means
+I{'}m on the flat part of one of these curves above. The plot above tells me on the flat side of the 20 categories curve. In other words, it{'}s
+almost certain that the total number of distinct signals used by the government operatives is 20. Now that doesn{'}t tell you what the signals mean,
+but at least its a start to decipering them.\\
+\\
+During the Second World War, Allied Intelligence had the hard task of estimating the number of Mark V tanks the Germans were producing. Intelligence
+estimates were frustratingly inconsistent. In 1943 some statisticians devised a way to estimate the number of Mark V tanks each month. After the
+war, German documents revealed that the statisticians{'} estimates were off by a few percentage points while the Intelligence estimates were off
+by 400$\%$ to 800$\%$. More recently, Roger Sessions has used this technique to minimize the architectural complexity of software through modular
+design.\\
+\\
+Techniques like the one above can be modified to estimate production of goods, number of pages in a report, the number of distinct birth dates in
+a small room of people, and even get a handle on Rumsfeld{'}s {``}known unknowns{''} (e.g. how many species of fish in this lake do I not know about?).
+
+\section*{Rolling the Dice When Uncertainty is High}
+
+Sometimes we know too little and there{'}s no way around it. But when we know a little about lots of things, that can turn out to be a good thing!
+\\
+\\
+Suppose we{'}re building a website (clinic, hospital, food/shelter station, or a road) but we know only a little about how heavily it will be used.
+How can we come up with a reasonable plan? We can reduce our uncertainty by (virtually) rolling the dice.\\
+\\
+The approach below segments users of the resource into 4 groups. It then models the number of activitites or interactions each user generates and
+the intensity of these activities. Since we don{'}t know much about the actual number of activities or the intensity of each activity, we set up
+wide ranges for these values. The Monte Carlo approach treats each range of values like a multi-dimensional die. Here we{'}ve set up ranges for the
+number of activities a user performs and the intensity of each activity -- i.e. 2 multi-dimensional dice. We roll the dice lots of times and average
+over the outcomes to get a better grip on how much the resource will be used.
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}*\text{PARAMETERS}\text{**}\text{**}*\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}
+\text{*)}}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Initialization} \text{*)}}\\
+\pmb{\text{Needs}[\text{{``}HypothesisTesting$\grave{ }${''}}];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(* Number of trials for the Monte Carlo simulation *)}}\\
+\pmb{\text{numTrials} = 3000;}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(* Number of working days and hours of work per day *)}}\\
+\pmb{\text{wd} = \text{numWorkingDaysPerYear} = 250;}\\
+\pmb{\text{wh} = \text{numWorkingHoursPerDay} = 8;}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Number} \text{of} \text{IEUs} \text{by} \text{type} - \text{data} \text{provided} \text{by} \text{the} \text{client}
+\text{*)}}\\
+\pmb{\text{numLightIEU} = 1;}\\
+\pmb{\text{numStandardIEU} = 1;}\\
+\pmb{\text{numHeavyIEU} = 1;}\\
+\pmb{\text{numExtremelyHeavyIEU} = 1;}\\
+\pmb{\text{numTotalIEU} = \text{numLightIEU} + \text{numStandardIEU}+\text{numHeavyIEU}+\text{numExtremelyHeavyIEU}}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(4\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{numUsers} = \{\text{numLightIEU}, \text{numStandardIEU}, \text{numHeavyIEU}, \text{numExtremelyHeavyIEU}\};}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(* Distribution of activities by user type by level *)}}\\
+\pmb{\text{(*} \{\% \text{level} 1 \text{activity}, \text{...}, \% \text{level} 5 \text{activity}\} \text{*)}}\\
+\pmb{\text{(* DO NOT CHANGE *)}}\\
+\pmb{\text{dLight} = \text{activityDistributionLightIEU} = \{0.7, 0.2, 0.06, 0.035, 0.005\};}\\
+\pmb{\text{dStd} = \text{activityDistributionStandardIEU} = \{0.7,0.2,0.06,0.035, 0.005\};}\\
+\pmb{\text{dHeavy} = \text{activityDistributionHeavyIEU} = \{0.6, 0.3, 0.06, 0.035, 0.005\};}\\
+\pmb{\text{dExHeavy} = \text{activityDistributionExtremelyHeavyIEU} = \{0.5,0.4,0.06,0.03,0.01\};}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(* LOAD FACTORS *)}}\\
+\pmb{\text{(*} \text{Applied} \text{to} \text{remove} \text{the} \text{level} \text{dimension} \text{from} \text{activities} \text{so} \text{that}
+\text{there} \text{is} }\\
+\pmb{\text{only} \text{one} \text{kind} \text{of} \text{activity} \text{after} \text{the} \text{load} \text{factor} \text{is} \text{applied}. \text{*)}}\\
+\pmb{\text{(* DO NOT CHANGE *)}}\\
+\pmb{\text{loadFactorByActivityLevel} = \{1, 3,5,100, 1000\};}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{END}
+\text{PARAMETERS}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}*
+\text{*)}}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(* Range in number of activities PER HOUR by user type *)}}\\
+\pmb{\text{(* DO NOT CHANGE *)}}\\
+\pmb{\text{(*} \text{SCENARIOS} 1, 2, 3 \text{*)}}\\
+\pmb{\text{numActivitiesPerHourLightIEU} = \{\{0,10\}, \{0,10\}, \{0,10\}\};}\\
+\pmb{\text{numActivitiesPerHourStandardIEU} = \{\{10,20\}, \{10,20\}, \{10,20\}\};}\\
+\pmb{\text{numActivitiesPerHourHeavyIEU} = \{\{20,60\}, \{20,50\}, \{20, 40\}\}; }\\
+\pmb{\text{numActivitiesPerHourExtremelyHeavyIEU} = \{\{60,100\}, \{50,90\}, \{40,80\}\};}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{}}\\
+\pmb{\text{(*} \text{PICK} \text{THE} \text{SCENARIO} - \text{IT} \text{CAN} \text{BE} 1, 2, \text{or} 3 \text{*)}}\\
+\pmb{\text{scenario} = 1;}\\
+\pmb{}\\
+\pmb{\text{(* SET THE ACTIVITY LEVELS FOR THE SCENARIO *)}}\\
+\pmb{\text{nRangeLight} = \text{numActivitiesPerHourLightIEU} [[\text{scenario}]];}\\
+\pmb{\text{nRangeStd} = \text{numActivitiesPerHourStandardIEU} [[\text{scenario}]];}\\
+\pmb{\text{nRangeHeavy} = \text{numActivitiesPerHourHeavyIEU} [[\text{scenario}]];}\\
+\pmb{\text{nRangeExHeavy} = \text{numActivitiesPerHourExtremelyHeavyIEU} [[\text{scenario}]];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{}}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{BEGIN}
+\text{CALCULATIONS}\text{**}\text{**}\text{**}**\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}\text{**}*
+\text{*)}}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(* Generate the total number of activities per year for each user type *)}}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Hour} \text{by} \text{hour}, a \text{single} \text{user} \text{will} \text{generate} \text{the} \text{following}
+\text{number} \text{of} \text{events} }\\
+\pmb{\text{through} \text{the} \text{course} \text{of} \text{the} \text{year} \text{*)}}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{lighteventsPerHourPerYear} = \text{RandomInteger}[\text{nRangeLight}, \text{wd} * \text{wh}];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{In} n \text{trials}, a \text{single} \text{user} \text{will} \text{generate} n \text{sets} \text{of} \text{hour}-\text{by}-}\\
+\pmb{\text{hour} \text{events} \text{through} \text{the} \text{course} \text{of} \text{the} \text{year} \text{*)}}\\
+\pmb{\text{lighteventsPerHourPerYearNTrials} = \text{Table}[\text{RandomInteger}[\text{nRangeLight}, \text{wd} * \text{wh}], \{\text{numTrials}\}];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(* Count up the total number of activities in each trial *)}}\\
+\pmb{\text{lighteventsPerTrial} = \text{Total}[\#] \& \text{/@} \text{lighteventsPerHourPerYearNTrials};}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{In} \text{each} \text{trial}, \text{find} \text{the} \text{number} \text{of} \text{activities} \text{that} \text{are}
+\text{in} \text{Level} 1 \text{through} }\\
+\pmb{\text{Level} 5 \text{--} \text{this} \text{is} \text{determined} \text{by} a \text{fixed} \text{distribution} \text{of} \text{activities} \text{by}
+\text{level} }\\
+\pmb{\text{by} \text{user} \text{type} \text{*)}}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{The} \text{result} \text{is} \text{transposed} \text{to} \text{collect} \text{up} \text{all} \text{level} 1 \text{activities},
+}\\
+\pmb{\text{level} 2 \text{actitivities}, \text{etc}. \text{*)}}\\
+\pmb{\text{lighteventsPerTrialByLevel} =\text{Transpose}[( \# * \text{dLight}) \& \text{/@} \text{lighteventsPerTrial}];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Complexity}-\text{weighted} \text{activity} \text{counts} \text{by} \text{level} \text{*)}}\\
+\pmb{\text{lighteventsPerTrialByLevelCW} = }\\
+\pmb{\text{Table}[\text{lighteventsPerTrialByLevel}[[i]] * \text{loadFactorByActivityLevel}[[i]], \{i, 1, 5\}];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(* BUILD FUNCTION TO GENERATE ACTIVITY COUNTS BY USER TYPE AND LEVEL OVER nTrials *)}}\\
+\pmb{\text{(*} \text{Assume} \text{that} \text{there} \text{is} \text{only} 1 \text{user} \text{of} a \text{certain} \text{type} \text{--} \text{later}
+\text{we} \text{can} \text{use} \text{the} }\\
+\pmb{\text{number} \text{of} \text{users} \text{provided} \text{to} \text{calculate} \text{the} \text{total} \text{activity} \text{counts} \text{by}
+\text{level} }\\
+\pmb{\text{across} \text{all} \text{user} \text{types} \text{*)}}\\
+\pmb{\text{actsByLevel}[\text{rangeOfActsPerHour$\_$}, \text{distOfActsByLevel$\_$}, \text{weighted$\_$:}0]\text{:=} \text{Module}[}\\
+\pmb{\{\text{workDaysPerYear} = 10,}\\
+\pmb{\text{workHoursPerDay} = 8, }\\
+\pmb{\text{nTrials} = 5000, }\\
+\pmb{\text{loadFactorByActivityLevel} = \{1, 3,5,100, 1000\},}\\
+\pmb{\text{eventsPerHourPerYear}, }\\
+\pmb{\text{eventsPerHourPerYearNTrials}, }\\
+\pmb{\text{totalEventsPerTrial}, }\\
+\pmb{\text{eventsPerTrialByLevel}, }\\
+\pmb{\text{eventsPerTrialByLevelCW}\},}\\
+\pmb{\text{(*} \text{weighted} = 1 \text{generates} \text{complexity}-\text{weighted} \text{counts} \text{by} \text{level} \text{*)}}\\
+\pmb{\text{(*} \text{Hour} \text{by} \text{hour}, a \text{single} \text{user} \text{will} \text{generate} \text{the} \text{following} \text{number}
+\text{of} \text{events} }\\
+\pmb{\text{through} \text{the} \text{course} \text{of} \text{the} \text{year} \text{*)}}\\
+\pmb{\text{eventsPerHourPerYear} = \text{RandomInteger}[\text{rangeOfActsPerHour}, \text{wd} * \text{wh}];}\\
+\pmb{\text{(*} \text{In} n \text{trials}, a \text{single} \text{user} \text{will} \text{generate} n \text{sets} \text{of} \text{hour}-\text{by}-}\\
+\pmb{\text{hour} \text{events} \text{through} \text{the} \text{course} \text{of} \text{the} \text{year} \text{*)}}\\
+\pmb{\text{eventsPerHourPerYearNTrials} = \text{Table}[\text{RandomInteger}[\text{rangeOfActsPerHour}, \text{wd} * \text{wh}], }\\
+\pmb{\{\text{nTrials}\}];}\\
+\pmb{\text{(* Count up the total number of activities in each trial *)}}\\
+\pmb{\text{totalEventsPerTrial} = \text{Total}[\#] \& \text{/@} \text{eventsPerHourPerYearNTrials};}\\
+\pmb{\text{(*} \text{In} \text{each} \text{trial}, \text{find} \text{the} \text{number} \text{of} \text{activities} \text{that} \text{are} \text{in}
+\text{Level} 1 \text{through} }\\
+\pmb{\text{Level} 5 \text{--} \text{this} \text{is} \text{determined} \text{by} a \text{fixed} \text{distribution} \text{of} \text{activities} \text{by}
+}\\
+\pmb{\text{level} \text{by} \text{user} \text{type} \text{*)}}\\
+\pmb{\text{(*} \text{The} \text{result} \text{is} \text{transposed} \text{to} \text{collect} \text{up} \text{all} \text{level} 1 \text{activities},
+}\\
+\pmb{\text{level} 2 \text{actitivities}, \text{etc}. \text{*)}}\\
+\pmb{\text{(*} \text{The} \text{result} \text{is} a \text{set} \text{of} 5 \text{subsets}; }\\
+\pmb{\text{each} \text{subset} \text{represents} a \text{level} \text{of} \text{activity} \text{from} 1 \text{to} 5; }\\
+\pmb{\text{each} \text{element} \text{within} a \text{subset} \text{is} \text{the} \text{number} \text{of} \text{activiites} \text{generated} \text{at}
+\text{that} }\\
+\pmb{\text{level} \text{during} \text{that} \text{trial} \text{*)}}\\
+\pmb{\text{eventsPerTrialByLevel} =\text{Transpose}[( \# * \text{distOfActsByLevel}) \& \text{/@} \text{totalEventsPerTrial}];}\\
+\pmb{\text{(*} \text{Complexity}-\text{weighted} \text{activity} \text{counts} \text{by} \text{level} \text{*)}}\\
+\pmb{\text{eventsPerTrialByLevelCW} = }\\
+\pmb{\text{Table}[\text{eventsPerTrialByLevel}[[i]] * \text{loadFactorByActivityLevel}[[i]], \{i, 1, 5\}];}\\
+\pmb{\text{If}[\text{weighted} == 1, \text{eventsPerTrialByLevelCW}, \text{eventsPerTrialByLevel}]}\\
+\pmb{];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(* Adding up the events across all levels for each trial *)}}\\
+\pmb{\text{totalsByTrial}[\text{levelsData$\_$}]\text{:=} \text{Module}[\{\},}\\
+\pmb{\text{(*} \text{levelsData} \text{must} \text{be} \text{the} \text{complexity}-\text{weighted} \text{activities} \text{by} \text{level} \text{for}
+\text{each} \text{trail} \text{*)}}\\
+\pmb{\text{Total}[\#] \& \text{/@} \text{Transpose}[\text{levelsData}]}\\
+\pmb{];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(* Mean total value of activities across all levels *)}}\\
+\pmb{\text{meanTotalsByTrial}[\text{levelsData$\_$}]\text{:=} \text{Module}[\{\},}\\
+\pmb{\text{(*} \text{levelsData} \text{must} \text{be} \text{the} \text{complexity}-\text{weighted} \text{activities} \text{by} \text{level} \text{for}
+\text{each} \text{trail} \text{*)}}\\
+\pmb{\text{Mean}[\text{totalsByTrial}[\text{levelsData}]]}\\
+\pmb{];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Now} \text{we} \text{can} \text{calculate} \text{the} \text{stats} \text{for} \text{each} \text{level} \text{of}
+\text{activity} \text{across} \text{all} \text{the} }\\
+\pmb{\text{trials} \text{and} \text{display} \text{them} \text{*)}}\\
+\pmb{\text{dStats}[\text{levelsData$\_$}, \text{histo$\_$:}0]\text{:=} \text{Module}[\{\text{in}, \text{hist}, \text{rowHeadings}, \text{colHeadings},
+\text{out}\},}\\
+\pmb{\text{(* levelsData is the output of the actsByLevel function *)}}\\
+\pmb{\text{(*} \text{If} \text{histo} == 1, a \text{histogram} \text{of} \text{activity} \text{counts} \text{at} \text{each} \text{level} \text{is}
+\text{shown} \text{*)}}\\
+\pmb{\text{in} = }\\
+\pmb{\{\text{Mean}[\#],\text{MeanCI}[\#], \text{StandardDeviation}[\#], \text{Quartiles}[\#],\text{InterquartileRange}[\#], }\\
+\pmb{N[\text{Mean}[\#] - 2* \text{StandardDeviation}[\#]],N[\text{Mean}[\#] + 2* \text{StandardDeviation}[\#]], }\\
+\pmb{\text{Min}[\#],\text{Max}[\#]\} \& \text{/@} \text{levelsData};}\\
+\pmb{\text{rowHeadings} = \text{Table}[\text{Prepend}[\text{in}[[i]], \text{{``}Level {''}} <> \text{ToString}[i] <> \text{{``} Activities{''}}],
+}\\
+\pmb{\{i, 1, \text{Length}[\text{in}]\}];}\\
+\pmb{\text{colHeadings} = \{\text{{``} {''}} , \text{{``}Mean{''}}, \text{{``}Mean CI{''}}, \text{{``}Std Dev{''}}, \text{{``}Quartiles{''}}, }\\
+\pmb{\text{{``}Interquartile Range{''}}, \text{{``}Mean Minus 2 Sigma{''}}, \text{{``}Mean Plus 2 Sigma{''}}, \text{{``}Min{''}}, \text{{``}Max{''}}\};}\\
+\pmb{\text{out} = \text{Grid}[\text{Prepend}[\text{rowHeadings}, \text{colHeadings}], \text{Frame}\to \text{All}];}\\
+\pmb{\text{hist} = \text{Histogram}[\#] \& \text{/@} \text{levelsData};}\\
+\pmb{\text{If}[\text{histo} == 1, \text{hist}, \text{out}]}\\
+\pmb{];}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Now} \text{we} \text{can} \text{calculate} \text{the} \text{stats} \text{for} \text{total} \text{complexity}-}\\
+\pmb{\text{weighted} \text{activity} \text{counts} \text{across} \text{all} \text{the} \text{trials} \text{and} \text{display} \text{them} \text{*)}}\\
+\pmb{\text{dStatsTotals}[\text{levelsData$\_$}, \text{histo$\_$:}0]\text{:=} }\\
+\pmb{\text{Module}[\{\text{in}, \text{totals}, \text{rowHeadings}, \text{colHeadings}, \text{out}\},}\\
+\pmb{\text{(* levelsData is the output of the actsByLevel function *)}}\\
+\pmb{\text{(* Add up the total activiites across all levels in each trial *)}}\\
+\pmb{\text{totals} = \text{totalsByTrial}[\text{levelsData}];}\\
+\pmb{\text{in} = \{\text{Mean}[\text{totals}],\text{MeanCI}[\text{totals}], \text{StandardDeviation}[\text{totals}], \text{Quartiles}[\text{totals}],}\\
+\pmb{\text{InterquartileRange}[\text{totals}], N[\text{Mean}[\text{totals}] - 2* \text{StandardDeviation}[\text{totals}]],}\\
+\pmb{N[\text{Mean}[\text{totals}] + 2* \text{StandardDeviation}[\text{totals}]], \text{Min}[\text{totals}],\text{Max}[\text{totals}]\};}\\
+\pmb{\text{rowHeadings} = \text{Prepend}[\text{in}, \text{{``}Total Activity Count{''}}];}\\
+\pmb{\text{colHeadings} = \{\text{{``} {''}} , \text{{``}Mean{''}}, \text{{``}Mean CI{''}}, \text{{``}Std Dev{''}}, \text{{``}Quartiles{''}}, }\\
+\pmb{\text{{``}Interquartile Range{''}}, \text{{``}Mean Minus 2 Sigma{''}}, \text{{``}Mean Plus 2 Sigma{''}}, \text{{``}Min{''}}, \text{{``}Max{''}}\};}\\
+\pmb{\text{out} = \text{Grid}[\{\text{colHeadings}, \text{rowHeadings}\}, \text{Frame}\to \text{All}];}\\
+\pmb{\text{If}[\text{histo} == 1, \text{Histogram}[\text{totals}], \text{out}]}\\
+\pmb{];}\)
+\end{doublespace}
+
+Light User Activity Counts (after normalizing for intensity)
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Total} \text{activity} \text{counts} \text{across} \text{all} \text{levels} \text{--} \text{COMPLEXITY} \text{WEIGHTED}
+\text{*)}}\\
+\pmb{\text{dStatsTotals}[\text{actsByLevel}[\text{nRangeLight}, \text{dLight}, 1],1]}\)
+\end{doublespace}
+
+\includegraphics{Small Data v2_gr3.eps}
+
+Standard User Activity Counts (after normalizing for intensity)
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Total} \text{activity} \text{counts} \text{across} \text{all} \text{levels} \text{--} \text{COMPLEXITY} \text{WEIGHTED}
+\text{*)}}\\
+\pmb{\text{dStatsTotals}[\text{actsByLevel}[\text{nRangeStd}, \text{dStd}, 1],1]}\)
+\end{doublespace}
+
+\includegraphics{Small Data v2_gr4.eps}
+
+Heavy User Activity Counts (after normalizing for intensity)
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Total} \text{activity} \text{counts} \text{across} \text{all} \text{levels} \text{--} \text{COMPLEXITY} \text{WEIGHTED}
+\text{*)}}\\
+\pmb{\text{dStatsTotals}[\text{actsByLevel}[\text{nRangeHeavy}, \text{dHeavy}, 1],1]}\)
+\end{doublespace}
+
+\includegraphics{Small Data v2_gr5.eps}
+
+Extra Heavy User Activity Counts (after normalizing for intensity)
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Total} \text{activity} \text{counts} \text{across} \text{all} \text{levels} \text{--} \text{COMPLEXITY} \text{WEIGHTED}
+\text{*)}}\\
+\pmb{\text{dStatsTotals}[\text{actsByLevel}[\text{nRangeExHeavy}, \text{dExHeavy}, 1],1]}\)
+\end{doublespace}
+
+\includegraphics{Small Data v2_gr6.eps}
+
+We take the average number of activities for each type of user as the point estimate.
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Total} \text{mean} \text{activity} \text{count} \text{across} \text{all} \text{user} \text{types} \text{and} \text{all}
+\text{complexity}-}\\
+\pmb{\text{weighted} \text{activities} \text{*)}}\\
+\pmb{\text{(*} \text{For} 1 \text{user} \text{of} \text{certain} \text{type}, }\\
+\pmb{\text{the} \text{mean} \text{total} \text{number} \text{of} \text{complexity}-\text{weighted} \text{activities} \text{across} \text{all} \text{levels}
+\text{*)}}\\
+\pmb{\text{mt1Light} = \text{meanTotalsByTrial}[\text{actsByLevel}[\text{nRangeLight}, \text{dLight},1]]}\\
+\pmb{\text{mt1Std} = \text{meanTotalsByTrial}[\text{actsByLevel}[\text{nRangeStd}, \text{dStd},1]]}\\
+\pmb{\text{mt1Heavy} = \text{meanTotalsByTrial}[\text{actsByLevel}[\text{nRangeHeavy}, \text{dHeavy},1]]}\\
+\pmb{\text{mt1ExHeavy} = \text{meanTotalsByTrial}[\text{actsByLevel}[\text{nRangeExHeavy}, \text{dExHeavy},1]]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(101014.\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(303022.\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(824089.\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(2.39968\times 10^6\)
+\end{doublespace}
+
+The total number of complexity-weighted activities that are estimated from the Monte Carlo are:
+
+\begin{doublespace}
+\noindent\(\pmb{\text{(*} \text{Total} \text{mean} \text{number} \text{of} \text{activities} \text{for} \text{n1} \text{Light}, \text{n2} \text{Std},
+\text{n3} \text{Heavy}, }\\
+\pmb{\text{and} \text{n4} \text{Ex} \text{Heavy} \text{users} \text{*)}}\\
+\pmb{\text{mtAllUsers} = }\\
+\pmb{\text{Total}[\{\text{mt1Light} * \text{numLightIEU}, \text{mt1Std} * \text{numStandardIEU}, \text{mt1Heavy} * \text{numHeavyIEU}, }\\
+\pmb{\text{mt1ExHeavy} * \text{numExtremelyHeavyIEU}\}]}\)
+\end{doublespace}
+
+\begin{doublespace}
+\noindent\(3.6278\times 10^6\)
+\end{doublespace}
+
+Because this is a simulation this total number of activities will change from one simulation to the next. How much will it change? We can find out
+by running the Monte Carlo multiple times and see how the results vary. \\
+\\
+I won{'}t show the results here, but as you might guess, the bands get tighter -- the conditions under which this occurs (rather than say, a widening
+of the range) quickly opens up vistas in mathematical statistics. Seeing how these bands evolve gives us { }a sense of whether the errors in the
+process are random or systematic.
+
+\section*{Summary}
+
+We{'}ve explored four areas where data are sparse and simulation serves us well. In addition to helping make the most out of available data, simulation
+is useful for the following reasons.\\
+\\
+* Even simple problems get complicated very quickly (pricing, birthdays, $\ldots $).\\
+* Not everyone finds equations insightful. Navier-Stokes equations and Maxwell{'}s laws are bursting with insight for physicists but hold no special
+meaning for most of us.\\
+* Manipulating equations is hard and there{'}s not much insight in manipulating them.\\
+* Even when something is in equation form, it might not have a {``}closed form{''} solution (e.g. the 3-body problem in celestial mechanics).\\
+* It{'}s hard to get something you want to study into an equation form (e.g. evaluating how good an algorithm is).\\
+
+
+\end{document}
