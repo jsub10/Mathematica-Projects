@@ -1,0 +1,705 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN"
+        "HTMLFiles/xhtml-math11-f.dtd">
+
+<!-- Created with the Wolfram Language : www.wolfram.com -->
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+ <title>
+  Untitled
+ </title>
+ <link href="HTMLFiles/Small Data v2.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<p class="Title">
+ Making the Most of Available Data
+</p>
+
+
+
+<p class="Subsection">
+ Simulation can help when data are sparse or uncertainty runs high. Here are four examples. I&rsquo;ve left all the code in place so you can see it; you can safely ignore it without losing the thread.
+</p>
+
+
+
+<p class="Section">
+ Using Small Samples to Estimate a Median Value
+</p>
+
+
+
+<p class="Text">
+ It&rsquo;s easy to fixate on measuring things accurately. But if we step back a moment we&rsquo;d realize that in many instances, we don&rsquo;t need to be that accurate. All we need to know is if the thing we&rsquo;re trying to measure is smaller or larger than a certain threshold. In these situations, we can do magic with small amounts of data! <br /><br />Here&rsquo;s an example from Douglas Hubbard&rsquo;s book, <span style='font-style: italic;'>How to Measure Anything</span>. I&rsquo;ve revised it a bit for our purposes.<br /><br />A group of herders (let&rsquo;s say there are a total of 200 of them) walk long distances in hostile territory to procure their daily supply of potable water. If the bulk of the group spends more than 8 hours a day procuring water, then we need to invest in keeping them safe. <br /><br />The only available data on the group is from researchers who spent some time with just 7 members of the group. From this work we know that&nbsp;&nbsp;of the 7 members each spent (on average) the following number of hours each day procuring water: 6, 11, 8, 4, 9, 12, 16. That&rsquo;s it for the available data.<br /><br /><span style='font-weight: bold;'>Decision Criterion: If more than half of the group spends more than 8 hours a day procuring water, then they need more protection.</span><br /><br />To make a decision we need to know the median time spent procuring water. If the median is above 8 hours, we act, if it isn&rsquo;t, we don&rsquo;t. Given our 7 data points, can we estimate the median? <br /><br />The first thing to realize is that it&rsquo;s almost certain that the median is somewhere between the lowest and the highest value. How certain? Well, with 7 data points, we can be more than 99% certain that the median is somewhere between 4 and 16.
+</p>
+
+
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_1.gif" alt="Small Data v2_1.gif" width="502" height="39" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_2.png" alt="Small Data v2_2.png" width="198" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_3.png" alt="Small Data v2_3.png" width="520" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_4.png" alt="Small Data v2_4.png" width="622" height="39" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_5.gif" alt="Small Data v2_5.gif" width="360" height="225" style="vertical-align:middle;" usemap="#map_5" />
+<map name="map_5">
+<area shape="rect" coords="0,225,360,0" title="Piecewise[{{0.015625 Binomial[6, $CellContext`x], 0 <= $CellContext`x <= 6}}][$CellContext`x]" nohref="" />
+</map>
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_6.png" alt="Small Data v2_6.png" width="62" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ Here&rsquo;s how to think about it. When you pick a member from the group, there&rsquo;s a fifty-fifty chance that they&rsquo;ll be above (or below) the median value. That&rsquo;s what the median means. So picking someone is like tossing a coin; if they are over the median value then imagine they&rsquo;re tails and if they are under the median value then imagine they&rsquo;re heads. So, when a coin is tossed 7 times, the chance of getting all heads (i.e. all values below the median) or all tails (i.e. all values above the median) is less than 1% -- it&rsquo;s about 0.78%. 
+</p>
+
+
+
+<p class="Text">
+ That&rsquo;s nice, but can we do better? If the median is really 8, how likely are the values we got? Let&rsquo;s assume that the values are normally distributed but there&rsquo;s a lot of variation (4 and 16 gives us a sense that the spread isn&rsquo;t small).&nbsp;&nbsp;
+</p>
+
+
+
+<p class="Text">
+ Let&rsquo;s simulate picking 7 values from a normal distribution that has a mean (and hence a median too) of 8 and a standard deviation of 4. We generate 10,000 such sets of 7 values picked at random from the normal distribution we&rsquo;ve specified.
+</p>
+
+
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_7.png" alt="Small Data v2_7.png" width="536" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ How many of these samples have a spread of 12 or greater (i.e. 16 - 4)?
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_8.png" alt="Small Data v2_8.png" width="31" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ So what&rsquo;s the chance that we see what we see given that the median value is 8 or higher? The answer is: 
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_9.png" alt="Small Data v2_9.png" width="47" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ So there&rsquo;s around a 33% chance that our group&rsquo;s median is 8 or above. That&rsquo;s the best we can do with the sample we have, but at least it was something.
+</p>
+
+
+
+<p class="Section">
+ Estimating Corruption Level - Using Small Samples to Make Large Reductions in Uncertainty
+</p>
+
+
+
+<p class="Text">
+ We&rsquo;re trying to assess the level of corruption in a particular government institution. There are only a few studies out there and data is hard to come by. Let&rsquo;s measure corruption level in the same way we measure customer satisfaction. Suppose 100 people who have interacted with the institution. If 90% encountered one or more corrupt practices (assuming we&rsquo;ve defined and listed the set of corrupt practices) we say the corruption level of the institution is 90%.<br /><br />Based on some background knowledge, we reckon that the institution&rsquo;s corruption level is somewhere between 50% to 90%. It&rsquo;s not below 50% and it&rsquo;s very unlikely to be above 90%. Since we can&rsquo;t yet distinguish if it&rsquo;s 50% or 90%, we attribute the same probability of 0.2 to each level of corruption. <br /><br /><span style='font-weight: bold;'>Decision Criterion: Take action when the corruption level is at or greater than 70%. <br /></span><br />We&rsquo;d like to use some data to get a bit more certain about our beliefs. How much can a 20-person poll (randomly selected, of course) reduce our uncertainty?<br /><br />We begin by considering a virtual experiment. If the corruption level is indeed 90%, what&rsquo;s the probability that in a poll of 20 people, 18 of them (i.e. 90%) will say they encountered corruption? We can simulate this.
+</p>
+
+
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_10.png" alt="Small Data v2_10.png" width="636" height="438" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ At the risk of not rolling our own, likelihood2 is also given by the Binomial Distribution with n = 20 and p = 0.9
+</p>
+
+
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_11.png" alt="Small Data v2_11.png" width="92" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_12.png" alt="Small Data v2_12.png" width="511" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_13.png" alt="Small Data v2_13.png" width="654" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_14.png" alt="Small Data v2_14.png" width="638" height="64" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_15.png" alt="Small Data v2_15.png" width="164" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_16.gif" alt="Small Data v2_16.gif" width="360" height="231" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ Here is the result of such a simulation. In a poll of 20 people it lists the probability of 1 person saying he or she encountered corruption, 2 people saying that they did, 3 people saying that they did, and so on all the way to all 20 people saying they encountered corruption -- given that the real rate of corruption is 90%.
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_17.png" alt="Small Data v2_17.png" width="575" height="60" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ And here is a plot of that simulation.
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_18.gif" alt="Graphics:Actual Corruption = 90%" width="600" height="327" style="vertical-align:middle;" usemap="#map_18" />
+<map name="map_18">
+<area shape="rect" coords="471,223,474,220" title="{20., 0.113}" nohref="" />
+<area shape="rect" coords="449,92,452,89" title="{19., 0.279}" nohref="" />
+<area shape="rect" coords="428,84,431,81" title="{18., 0.29}" nohref="" />
+<area shape="rect" coords="407,176,410,173" title="{17., 0.173}" nohref="" />
+<area shape="rect" coords="385,242,388,239" title="{16., 0.089}" nohref="" />
+<area shape="rect" coords="364,274,367,271" title="{15., 0.048}" nohref="" />
+<area shape="rect" coords="342,308,345,305" title="{14., 0.004}" nohref="" />
+<area shape="rect" coords="321,309,324,306" title="{13., 0.003}" nohref="" />
+<area shape="rect" coords="300,311,303,308" title="{12., 0.001}" nohref="" />
+<area shape="rect" coords="278,311,281,308" title="{11., 0.}" nohref="" />
+<area shape="rect" coords="257,311,260,308" title="{10., 0.}" nohref="" />
+<area shape="rect" coords="236,311,239,308" title="{9., 0.}" nohref="" />
+<area shape="rect" coords="214,311,217,308" title="{8., 0.}" nohref="" />
+<area shape="rect" coords="193,311,196,308" title="{7., 0.}" nohref="" />
+<area shape="rect" coords="172,311,175,308" title="{6., 0.}" nohref="" />
+<area shape="rect" coords="150,311,153,308" title="{5., 0.}" nohref="" />
+<area shape="rect" coords="129,311,132,308" title="{4., 0.}" nohref="" />
+<area shape="rect" coords="108,311,111,308" title="{3., 0.}" nohref="" />
+<area shape="rect" coords="86,311,89,308" title="{2., 0.}" nohref="" />
+<area shape="rect" coords="65,311,68,308" title="{1., 0.}" nohref="" />
+</map>
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_19.png" alt="Small Data v2_19.png" width="400" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ And here are the results of such a simulations for when the corruption level is really 90%, 80%, and so on all the way down to 50%. So, if the real level of corruption is 50%, how likely is it for 10 out of the 20 people sampled to say they encountered corruption? You can read it off the diagram below - it&rsquo;s somewhere around 0.17 or thereabouts. (It&rsquo;s much lower than you thought, isn&rsquo;t it?)
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_20.gif" alt="Small Data v2_20.gif" width="672" height="346" style="vertical-align:middle;" usemap="#map_20" />
+<map name="map_20">
+<area shape="rect" coords="471,329,474,326" title="{20., 0.}" nohref="" />
+<area shape="rect" coords="449,329,452,326" title="{19., 0.001}" nohref="" />
+<area shape="rect" coords="428,329,431,326" title="{18., 0.}" nohref="" />
+<area shape="rect" coords="407,329,410,326" title="{17., 0.001}" nohref="" />
+<area shape="rect" coords="385,329,388,326" title="{16., 0.001}" nohref="" />
+<area shape="rect" coords="364,318,367,315" title="{15., 0.015}" nohref="" />
+<area shape="rect" coords="342,301,345,298" title="{14., 0.036}" nohref="" />
+<area shape="rect" coords="321,273,324,270" title="{13., 0.072}" nohref="" />
+<area shape="rect" coords="300,232,303,229" title="{12., 0.124}" nohref="" />
+<area shape="rect" coords="278,212,281,209" title="{11., 0.15}" nohref="" />
+<area shape="rect" coords="257,181,260,178" title="{10., 0.189}" nohref="" />
+<area shape="rect" coords="236,212,239,209" title="{9., 0.149}" nohref="" />
+<area shape="rect" coords="214,238,217,235" title="{8., 0.117}" nohref="" />
+<area shape="rect" coords="193,265,196,262" title="{7., 0.082}" nohref="" />
+<area shape="rect" coords="172,294,175,291" title="{6., 0.045}" nohref="" />
+<area shape="rect" coords="150,321,153,318" title="{5., 0.011}" nohref="" />
+<area shape="rect" coords="129,325,132,322" title="{4., 0.006}" nohref="" />
+<area shape="rect" coords="108,329,111,326" title="{3., 0.}" nohref="" />
+<area shape="rect" coords="86,329,89,326" title="{2., 0.001}" nohref="" />
+<area shape="rect" coords="65,329,68,326" title="{1., 0.}" nohref="" />
+<area shape="rect" coords="471,329,474,326" title="{20., 0.}" nohref="" />
+<area shape="rect" coords="449,327,452,324" title="{19., 0.003}" nohref="" />
+<area shape="rect" coords="428,325,431,322" title="{18., 0.006}" nohref="" />
+<area shape="rect" coords="407,320,410,317" title="{17., 0.012}" nohref="" />
+<area shape="rect" coords="385,301,388,298" title="{16., 0.036}" nohref="" />
+<area shape="rect" coords="364,267,367,264" title="{15., 0.079}" nohref="" />
+<area shape="rect" coords="342,248,345,245" title="{14., 0.104}" nohref="" />
+<area shape="rect" coords="321,187,324,184" title="{13., 0.181}" nohref="" />
+<area shape="rect" coords="300,197,303,194" title="{12., 0.169}" nohref="" />
+<area shape="rect" coords="278,205,281,202" title="{11., 0.158}" nohref="" />
+<area shape="rect" coords="257,233,260,230" title="{10., 0.123}" nohref="" />
+<area shape="rect" coords="236,275,239,272" title="{9., 0.069}" nohref="" />
+<area shape="rect" coords="214,295,217,292" title="{8., 0.044}" nohref="" />
+<area shape="rect" coords="193,322,196,319" title="{7., 0.01}" nohref="" />
+<area shape="rect" coords="172,326,175,323" title="{6., 0.004}" nohref="" />
+<area shape="rect" coords="150,329,153,326" title="{5., 0.}" nohref="" />
+<area shape="rect" coords="129,328,132,325" title="{4., 0.002}" nohref="" />
+<area shape="rect" coords="108,329,111,326" title="{3., 0.}" nohref="" />
+<area shape="rect" coords="86,329,89,326" title="{2., 0.}" nohref="" />
+<area shape="rect" coords="65,329,68,326" title="{1., 0.}" nohref="" />
+<area shape="rect" coords="471,329,474,326" title="{20., 0.}" nohref="" />
+<area shape="rect" coords="449,322,452,319" title="{19., 0.01}" nohref="" />
+<area shape="rect" coords="428,307,431,304" title="{18., 0.029}" nohref="" />
+<area shape="rect" coords="407,272,410,269" title="{17., 0.073}" nohref="" />
+<area shape="rect" coords="385,227,388,224" title="{16., 0.13}" nohref="" />
+<area shape="rect" coords="364,196,367,193" title="{15., 0.17}" nohref="" />
+<area shape="rect" coords="342,180,345,177" title="{14., 0.19}" nohref="" />
+<area shape="rect" coords="321,200,324,197" title="{13., 0.165}" nohref="" />
+<area shape="rect" coords="300,234,303,231" title="{12., 0.122}" nohref="" />
+<area shape="rect" coords="278,278,281,275" title="{11., 0.065}" nohref="" />
+<area shape="rect" coords="257,307,260,304" title="{10., 0.028}" nohref="" />
+<area shape="rect" coords="236,322,239,319" title="{9., 0.01}" nohref="" />
+<area shape="rect" coords="214,324,217,321" title="{8., 0.007}" nohref="" />
+<area shape="rect" coords="193,329,196,326" title="{7., 0.001}" nohref="" />
+<area shape="rect" coords="172,329,175,326" title="{6., 0.}" nohref="" />
+<area shape="rect" coords="150,329,153,326" title="{5., 0.}" nohref="" />
+<area shape="rect" coords="129,329,132,326" title="{4., 0.}" nohref="" />
+<area shape="rect" coords="108,329,111,326" title="{3., 0.}" nohref="" />
+<area shape="rect" coords="86,329,89,326" title="{2., 0.}" nohref="" />
+<area shape="rect" coords="65,329,68,326" title="{1., 0.}" nohref="" />
+<area shape="rect" coords="471,320,474,317" title="{20., 0.012}" nohref="" />
+<area shape="rect" coords="449,283,452,280" title="{19., 0.059}" nohref="" />
+<area shape="rect" coords="428,232,431,229" title="{18., 0.124}" nohref="" />
+<area shape="rect" coords="407,142,410,139" title="{17., 0.238}" nohref="" />
+<area shape="rect" coords="385,165,388,162" title="{16., 0.209}" nohref="" />
+<area shape="rect" coords="364,208,367,205" title="{15., 0.155}" nohref="" />
+<area shape="rect" coords="342,234,345,231" title="{14., 0.121}" nohref="" />
+<area shape="rect" coords="321,294,324,291" title="{13., 0.045}" nohref="" />
+<area shape="rect" coords="300,308,303,305" title="{12., 0.027}" nohref="" />
+<area shape="rect" coords="278,325,281,322" title="{11., 0.006}" nohref="" />
+<area shape="rect" coords="257,327,260,324" title="{10., 0.003}" nohref="" />
+<area shape="rect" coords="236,329,239,326" title="{9., 0.001}" nohref="" />
+<area shape="rect" coords="214,329,217,326" title="{8., 0.}" nohref="" />
+<area shape="rect" coords="193,329,196,326" title="{7., 0.}" nohref="" />
+<area shape="rect" coords="172,329,175,326" title="{6., 0.}" nohref="" />
+<area shape="rect" coords="150,329,153,326" title="{5., 0.}" nohref="" />
+<area shape="rect" coords="129,329,132,326" title="{4., 0.}" nohref="" />
+<area shape="rect" coords="108,329,111,326" title="{3., 0.}" nohref="" />
+<area shape="rect" coords="86,329,89,326" title="{2., 0.}" nohref="" />
+<area shape="rect" coords="65,329,68,326" title="{1., 0.}" nohref="" />
+<area shape="rect" coords="471,243,474,240" title="{20., 0.11}" nohref="" />
+<area shape="rect" coords="449,109,452,106" title="{19., 0.28}" nohref="" />
+<area shape="rect" coords="428,102,431,99" title="{18., 0.289}" nohref="" />
+<area shape="rect" coords="407,173,410,170" title="{17., 0.199}" nohref="" />
+<area shape="rect" coords="385,268,388,265" title="{16., 0.078}" nohref="" />
+<area shape="rect" coords="364,302,367,299" title="{15., 0.035}" nohref="" />
+<area shape="rect" coords="342,323,345,320" title="{14., 0.008}" nohref="" />
+<area shape="rect" coords="321,329,324,326" title="{13., 0.001}" nohref="" />
+<area shape="rect" coords="300,329,303,326" title="{12., 0.}" nohref="" />
+<area shape="rect" coords="278,329,281,326" title="{11., 0.}" nohref="" />
+<area shape="rect" coords="257,329,260,326" title="{10., 0.}" nohref="" />
+<area shape="rect" coords="236,329,239,326" title="{9., 0.}" nohref="" />
+<area shape="rect" coords="214,329,217,326" title="{8., 0.}" nohref="" />
+<area shape="rect" coords="193,329,196,326" title="{7., 0.}" nohref="" />
+<area shape="rect" coords="172,329,175,326" title="{6., 0.}" nohref="" />
+<area shape="rect" coords="150,329,153,326" title="{5., 0.}" nohref="" />
+<area shape="rect" coords="129,329,132,326" title="{4., 0.}" nohref="" />
+<area shape="rect" coords="108,329,111,326" title="{3., 0.}" nohref="" />
+<area shape="rect" coords="86,329,89,326" title="{2., 0.}" nohref="" />
+<area shape="rect" coords="65,329,68,326" title="{1., 0.}" nohref="" />
+</map>
+</p>
+
+<p class="Text">
+ Now you conduct your poll of 20 people and 14 of them say they&rsquo;ve encountered corruption. You can use this small sample to revise your initial probabilities about the actual rate of corruption.<br /><br />Let&rsquo;s see how the probability that the corruption level is 70% is changed by this evidence. Remember it used to be at 0.2. Has the evidence increased this probability or decreased it? 
+</p>
+
+
+
+<p class="Text">
+ Here are the usual Bayesian manipulations....
+</p>
+
+
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_21.png" alt="Small Data v2_21.png" width="365" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_22.png" alt="Small Data v2_22.png" width="39" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_23.png" alt="Small Data v2_23.png" width="100" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_24.png" alt="Small Data v2_24.png" width="47" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ ...which result in a revised probability for our 70% corruption hypothesis.
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_25.png" alt="Small Data v2_25.png" width="62" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ We see that the probability that corruption is 70% has increased from the prior level of 0.2 -- that&rsquo;s quite a jump for a small sample of just 20. But given this evidence, what has happened to the priority of corruption being 90%? Let&rsquo;s find out.
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_26.png" alt="Small Data v2_26.png" width="39" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_27.png" alt="Small Data v2_27.png" width="100" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_28.png" alt="Small Data v2_28.png" width="70" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ The probability that corruption is at 90% has dropped to about a tenth of its prior value. When uncertainty is large to begin with, it only takes a small amount of data to make large reductions in uncertainty. (That&rsquo;s one of the counter-intuitive lessons about dealing with uncertainty.)<br /><br />Error correction methods for crowd sourced content at sites like Foursquare and Yelp (and aymta.com) use similar Bayesian updating techniques. These can also be used in the monitoring and evaluation of initiatives.
+</p>
+
+
+
+<p class="Section">
+ Creative Prediction
+</p>
+
+
+
+<p class="Text">
+ Let&rsquo;s say that government operatives use a number of different types of signals to communicate. You&rsquo;d like to make a complete catalog of these signals. But you don&rsquo;t know how many different types of signals there are. So you begin observing and listing the ones you see. How many observations would you need to make before you can be quite sure that you&rsquo;ve seen all the different types of signals there are?<br /><br />This seems like such an open-ended problem. Is there a way to make progress on it? Some simulation will help us see an underlying pattern here that remains otherwise hidden. 
+</p>
+
+
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_29.png" alt="Small Data v2_29.png" width="681" height="963" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_30.png" alt="Small Data v2_30.png" width="418" height="39" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_31.png" alt="Small Data v2_31.png" width="620" height="102" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_32.png" alt="Small Data v2_32.png" width="685" height="81" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_33.png" alt="Small Data v2_33.png" width="282" height="39" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_34.gif" alt="Small Data v2_34.gif" width="735" height="309" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_35.png" alt="Small Data v2_35.png" width="313" height="39" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_36.gif" alt="Small Data v2_36.gif" width="835" height="366" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ Looking at the plot above, you can reason as follows. I don&rsquo;t know the total number of distinct signals (the number of categories) that the government operatives are using. However, I&rsquo;ve now made 200 observations and for the past 100 of these observations I have not seen anything new. That means I&rsquo;m on the flat part of one of these curves above. The plot above tells me on the flat side of the 20 categories curve. In other words, it&rsquo;s almost certain that the total number of distinct signals used by the government operatives is 20. Now that doesn&rsquo;t tell you what the signals mean, but at least its a start to decipering them.<br /><br />During the Second World War, Allied Intelligence had the hard task of estimating the number of Mark V tanks the Germans were producing. Intelligence estimates were frustratingly inconsistent. In 1943 some statisticians devised a way to estimate the number of Mark V tanks each month. After the war, German documents revealed that the statisticians&rsquo; estimates were off by a few percentage points while the Intelligence estimates were off by 400% to 800%. More recently, Roger Sessions has used this technique to minimize the architectural complexity of software through modular design.<br /><br />Techniques like the one above can be modified to estimate production of goods, number of pages in a report, the number of distinct birth dates in a small room of people, and even get a handle on Rumsfeld&rsquo;s &ldquo;known unknowns&rdquo; (e.g. how many species of fish in this lake do I not know about?).
+</p>
+
+
+
+<p class="Section">
+ Rolling the Dice When Uncertainty is High
+</p>
+
+
+
+<p class="Text">
+ Sometimes we know too little and there&rsquo;s no way around it. But when we know a little about lots of things, that can turn out to be a good thing! <br /><br />Suppose we&rsquo;re building a website (clinic, hospital, food/shelter station, or a road) but we know only a little about how heavily it will be used. How can we come up with a reasonable plan? We can reduce our uncertainty by (virtually) rolling the dice.<br /><br />The approach below segments users of the resource into 4 groups. It then models the number of activitites or interactions each user generates and the intensity of these activities. Since we don&rsquo;t know much about the actual number of activities or the intensity of each activity, we set up wide ranges for these values. The Monte Carlo approach treats each range of values like a multi-dimensional die. Here we&rsquo;ve set up ranges for the number of activities a user performs and the intensity of each activity -- i.e. 2 multi-dimensional dice. We roll the dice lots of times and average over the outcomes to get a better grip on how much the resource will be used.
+</p>
+
+
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_37.png" alt="Small Data v2_37.png" width="558" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_38.png" alt="Small Data v2_38.png" width="219" height="39" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_39.png" alt="Small Data v2_39.png" width="416" height="39" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_40.png" alt="Small Data v2_40.png" width="424" height="60" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_41.png" alt="Small Data v2_41.png" width="8" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_42.png" alt="Small Data v2_42.png" width="593" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_43.png" alt="Small Data v2_43.png" width="610" height="144" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_44.png" alt="Small Data v2_44.png" width="620" height="102" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_45.png" alt="Small Data v2_45.png" width="693" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_46.png" alt="Small Data v2_46.png" width="557" height="144" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_47.png" alt="Small Data v2_47.png" width="517" height="186" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_48.png" alt="Small Data v2_48.png" width="4" height="39" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_49.png" alt="Small Data v2_49.png" width="693" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_50.png" alt="Small Data v2_50.png" width="571" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_51.png" alt="Small Data v2_51.png" width="596" height="39" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_52.png" alt="Small Data v2_52.png" width="494" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_53.png" alt="Small Data v2_53.png" width="706" height="60" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_54.png" alt="Small Data v2_54.png" width="535" height="39" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_55.png" alt="Small Data v2_55.png" width="615" height="60" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_56.png" alt="Small Data v2_56.png" width="692" height="60" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_57.png" alt="Small Data v2_57.png" width="664" height="81" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_58.png" alt="Small Data v2_58.png" width="677" height="816" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_59.png" alt="Small Data v2_59.png" width="675" height="102" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_60.png" alt="Small Data v2_60.png" width="675" height="102" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_61.png" alt="Small Data v2_61.png" width="702" height="354" style="vertical-align:middle" />
+</p>
+
+<p class="Input">
+ <img src="HTMLFiles/Small Data v2_62.png" alt="Small Data v2_62.png" width="711" height="312" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ Light User Activity Counts (after normalizing for intensity)
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_63.gif" alt="Small Data v2_63.gif" width="360" height="223" style="vertical-align:middle;" usemap="#map_63" />
+<map name="map_63">
+<area shape="rect" coords="334,206,352,202" title="12" nohref="" />
+<area shape="rect" coords="317,206,335,199" title="22" nohref="" />
+<area shape="rect" coords="300,206,318,189" title="60" nohref="" />
+<area shape="rect" coords="283,206,301,174" title="113" nohref="" />
+<area shape="rect" coords="266,206,284,144" title="219" nohref="" />
+<area shape="rect" coords="249,206,266,116" title="322" nohref="" />
+<area shape="rect" coords="232,206,249,76" title="466" nohref="" />
+<area shape="rect" coords="215,206,232,38" title="601" nohref="" />
+<area shape="rect" coords="197,206,215,11" title="699" nohref="" />
+<area shape="rect" coords="180,206,198,21" title="663" nohref="" />
+<area shape="rect" coords="163,206,181,30" title="631" nohref="" />
+<area shape="rect" coords="146,206,164,78" title="458" nohref="" />
+<area shape="rect" coords="129,206,147,105" title="359" nohref="" />
+<area shape="rect" coords="112,206,129,158" title="172" nohref="" />
+<area shape="rect" coords="95,206,112,171" title="122" nohref="" />
+<area shape="rect" coords="78,206,95,190" title="56" nohref="" />
+<area shape="rect" coords="60,206,78,202" title="14" nohref="" />
+<area shape="rect" coords="43,206,61,203" title="9" nohref="" />
+<area shape="rect" coords="26,206,44,205" title="2" nohref="" />
+</map>
+</p>
+
+<p class="Text">
+ Standard User Activity Counts (after normalizing for intensity)
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_64.gif" alt="Small Data v2_64.gif" width="360" height="220" style="vertical-align:middle;" usemap="#map_64" />
+<map name="map_64">
+<area shape="rect" coords="325,203,352,202" title="2" nohref="" />
+<area shape="rect" coords="298,203,325,201" title="10" nohref="" />
+<area shape="rect" coords="271,203,299,193" title="67" nohref="" />
+<area shape="rect" coords="245,203,272,156" title="313" nohref="" />
+<area shape="rect" coords="218,203,245,92" title="751" nohref="" />
+<area shape="rect" coords="191,203,219,18" title="1259" nohref="" />
+<area shape="rect" coords="165,203,192,11" title="1307" nohref="" />
+<area shape="rect" coords="138,203,165,77" title="851" nohref="" />
+<area shape="rect" coords="111,203,138,151" title="347" nohref="" />
+<area shape="rect" coords="85,203,112,191" title="80" nohref="" />
+<area shape="rect" coords="58,203,85,201" title="9" nohref="" />
+<area shape="rect" coords="31,203,58,202" title="4" nohref="" />
+</map>
+</p>
+
+<p class="Text">
+ Heavy User Activity Counts (after normalizing for intensity)
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_65.gif" alt="Small Data v2_65.gif" width="360" height="223" style="vertical-align:middle;" usemap="#map_65" />
+<map name="map_65">
+<area shape="rect" coords="335,206,352,205" title="1" nohref="" />
+<area shape="rect" coords="319,206,336,205" title="1" nohref="" />
+<area shape="rect" coords="303,206,319,204" title="6" nohref="" />
+<area shape="rect" coords="286,206,303,199" title="23" nohref="" />
+<area shape="rect" coords="270,206,287,194" title="43" nohref="" />
+<area shape="rect" coords="254,206,271,182" title="86" nohref="" />
+<area shape="rect" coords="238,206,254,154" title="188" nohref="" />
+<area shape="rect" coords="221,206,238,120" title="315" nohref="" />
+<area shape="rect" coords="205,206,222,63" title="524" nohref="" />
+<area shape="rect" coords="189,206,206,45" title="592" nohref="" />
+<area shape="rect" coords="173,206,189,21" title="680" nohref="" />
+<area shape="rect" coords="156,206,173,11" title="717" nohref="" />
+<area shape="rect" coords="140,206,157,37" title="621" nohref="" />
+<area shape="rect" coords="124,206,141,72" title="490" nohref="" />
+<area shape="rect" coords="108,206,124,113" title="339" nohref="" />
+<area shape="rect" coords="91,206,108,149" title="207" nohref="" />
+<area shape="rect" coords="75,206,92,182" title="85" nohref="" />
+<area shape="rect" coords="59,206,76,191" title="53" nohref="" />
+<area shape="rect" coords="43,206,59,201" title="17" nohref="" />
+<area shape="rect" coords="26,206,43,202" title="12" nohref="" />
+</map>
+</p>
+
+<p class="Text">
+ Extra Heavy User Activity Counts (after normalizing for intensity)
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_66.gif" alt="Small Data v2_66.gif" width="360" height="226" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ We take the average number of activities for each type of user as the point estimate.
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_67.png" alt="Small Data v2_67.png" width="57" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_68.png" alt="Small Data v2_68.png" width="57" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_69.png" alt="Small Data v2_69.png" width="57" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_70.png" alt="Small Data v2_70.png" width="90" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ The total number of complexity-weighted activities that are estimated from the Monte Carlo are:
+</p>
+
+
+
+<p class="Output">
+ <img src="HTMLFiles/Small Data v2_71.png" alt="Small Data v2_71.png" width="82" height="17" style="vertical-align:middle" />
+</p>
+
+<p class="Text">
+ Because this is a simulation this total number of activities will change from one simulation to the next. How much will it change? We can find out by running the Monte Carlo multiple times and see how the results vary. <br /><br />I won&rsquo;t show the results here, but as you might guess, the bands get tighter -- the conditions under which this occurs (rather than say, a widening of the range) quickly opens up vistas in mathematical statistics. Seeing how these bands evolve gives us&nbsp;&nbsp;a sense of whether the errors in the process are random or systematic.
+</p>
+
+
+
+<p class="Section">
+ Summary
+</p>
+
+
+
+<p class="Text">
+ We&rsquo;ve explored four areas where data are sparse and simulation serves us well. In addition to helping make the most out of available data, simulation is useful for the following reasons.<br /><br />* Even simple problems get complicated very quickly (pricing, birthdays, &hellip;).<br />* Not everyone finds equations insightful. Navier-Stokes equations and Maxwell&rsquo;s laws are bursting with insight for physicists but hold no special meaning for most of us.<br />* Manipulating equations is hard and there&rsquo;s not much insight in manipulating them.<br />* Even when something is in equation form, it might not have a &ldquo;closed form&rdquo; solution (e.g. the 3-body problem in celestial mechanics).<br />* It&rsquo;s hard to get something you want to study into an equation form (e.g. evaluating how good an algorithm is).<br />
+</p>
+
+
+
+
+
+
+<div style="font-family:Helvetica; font-size:11px; width:100%; border:1px none #999999; border-top-style:solid; padding-top:2px; margin-top:20px;">
+ <a href="http://www.wolfram.com/language/" style="color:#000; text-decoration:none;">
+  <span style="color:#555555">Created with the Wolfram Language</span> 
+ </a>
+</div>
+</body>
+
+</html>
