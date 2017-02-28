@@ -1,0 +1,270 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     10132,        261]
+NotebookOptionsPosition[      9317,        230]
+NotebookOutlinePosition[      9671,        246]
+CellTagsIndexPosition[      9628,        243]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+  "nycBabyNamesURL", " ", "=", " ", 
+   "\"\<https://data.cityofnewyork.us/resource/25th-nujf.json\>\""}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.663778750946061*^9, 3.663778777679228*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"nycBabyNames", " ", "=", " ", 
+   RowBox[{"URLFetch", "[", "nycBabyNamesURL", "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.663778838587223*^9, 3.6637788494896507`*^9}, {
+  3.663778911282016*^9, 3.6637789209432373`*^9}, {3.6637791346538067`*^9, 
+  3.663779137435547*^9}, {3.663784960514131*^9, 3.6637849621589947`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"StringCases", "[", 
+   RowBox[{"nycBabyNames", ",", " ", "\"\<MALE\>\""}], "]"}], "//", " ", 
+  "Length"}]], "Input",
+ CellChangeTimes->{{3.663783767814333*^9, 3.6637838109879847`*^9}, {
+  3.663783868245117*^9, 3.663783876410524*^9}, {3.6637841376985292`*^9, 
+  3.663784138139391*^9}}],
+
+Cell[BoxData["1000"], "Output",
+ CellChangeTimes->{
+  3.663783812223473*^9, {3.66378387133162*^9, 3.663783877404861*^9}, {
+   3.663784139196034*^9, 3.663784152547627*^9}, 3.66378497074601*^9, 
+   3.663788459545137*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"StringTake", "[", 
+  RowBox[{"nycBabyNames", ",", 
+   RowBox[{"-", "400"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.663778925088044*^9, 3.663779000065826*^9}, {
+   3.663779051552657*^9, 3.663779063870586*^9}, {3.663779145421876*^9, 
+   3.6637791475310287`*^9}, {3.663779189692234*^9, 3.663779222258895*^9}, {
+   3.663779882027566*^9, 3.6637798838821697`*^9}, {3.663780626844432*^9, 
+   3.663780627668043*^9}, {3.663780872108358*^9, 3.663780872753951*^9}, {
+   3.6637814259276133`*^9, 3.663781434261046*^9}, {3.663783338518682*^9, 
+   3.663783345774197*^9}, 3.663783404069111*^9}],
+
+Cell[BoxData["\<\" \\\"cnt\\\" : \\\"10\\\",\\n  \\\"brth_yr\\\" : \\\"2011\\\
+\",\\n  \\\"gndr\\\" : \\\"FEMALE\\\",\\n  \\\"rnk\\\" : \\\"45\\\",\\n  \
+\\\"nm\\\" : \\\"ZAHARA\\\",\\n  \\\"ethcty\\\" : \\\"BLACK NON \
+HISPANIC\\\"\\n}\\n, {\\n  \\\"cnt\\\" : \\\"10\\\",\\n  \\\"brth_yr\\\" : \\\
+\"2011\\\",\\n  \\\"gndr\\\" : \\\"FEMALE\\\",\\n  \\\"rnk\\\" : \
+\\\"45\\\",\\n  \\\"nm\\\" : \\\"ZAHARA\\\",\\n  \\\"ethcty\\\" : \\\"BLACK \
+NON HISPANIC\\\"\\n}\\n, {\\n  \\\"cnt\\\" : \\\"10\\\",\\n  \\\"brth_yr\\\" \
+: \\\"2011\\\",\\n  \\\"gndr\\\" : \\\"FEMALE\\\",\\n  \\\"rnk\\\" : \\\"45\\\
+\",\\n  \\\"nm\\\" : \\\"ZANIYAH\\\",\\n  \\\"ethcty\\\" : \\\"BLACK NON \
+HISPANIC\\\"\\n}\\n ]\"\>"], "Output",
+ CellChangeTimes->{
+  3.66377893044799*^9, {3.663778962337017*^9, 3.663779001792656*^9}, 
+   3.663779066099524*^9, {3.663779148448332*^9, 3.663779162206134*^9}, {
+   3.663779198378304*^9, 3.66377922378388*^9}, 3.6637798845689917`*^9, 
+   3.6637806283132353`*^9, 3.663780873618669*^9, {3.6637814279180603`*^9, 
+   3.663781435030305*^9}, {3.66378333940736*^9, 3.663783346380645*^9}, 
+   3.6637834048835573`*^9, 3.663784156121176*^9, 3.66378497599333*^9, 
+   3.6637884595702257`*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"(*", " ", 
+  RowBox[{
+  "clean", " ", "up", " ", "the", " ", "start", " ", "and", " ", "end", " ", 
+   "of", " ", "the", " ", "string"}], " ", "*)"}]], "Input",
+ CellChangeTimes->{{3.6637806079910097`*^9, 3.6637806173000593`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"nycBN", " ", "=", " ", 
+   RowBox[{"StringDelete", "[", 
+    RowBox[{
+     RowBox[{"StringSplit", "[", 
+      RowBox[{
+       RowBox[{"StringDrop", "[", 
+        RowBox[{
+         RowBox[{"StringDrop", "[", 
+          RowBox[{"nycBabyNames", ",", " ", "1"}], "]"}], ",", 
+         RowBox[{"-", "1"}]}], "]"}], ",", " ", "\"\<,{\>\""}], "]"}], ",", 
+     " ", "\"\<\\\"\>\""}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6637806417496843`*^9, 3.663780659346814*^9}, {
+  3.663780710088546*^9, 3.6637808515146027`*^9}, {3.6637808927190742`*^9, 
+  3.663780896589593*^9}, {3.6637810490206747`*^9, 3.6637810536263027`*^9}, {
+  3.6637839423475227`*^9, 3.66378396364863*^9}}],
+
+Cell[BoxData[
+ RowBox[{"(*", " ", 
+  RowBox[{
+   RowBox[{
+   "After", " ", "some", " ", "experimentation", " ", "with", " ", "the", " ",
+     "format", " ", "of", " ", "the", " ", "web", " ", "content"}], ",", " ", 
+   
+   RowBox[{
+    RowBox[{"here", "'"}], "s", " ", "a", " ", "way", " ", "to", " ", "pull", 
+    " ", "out", " ", "what", " ", "we", " ", "need"}]}], " ", "*)"}]], "Input",\
+
+ CellChangeTimes->{{3.6637819467926283`*^9, 3.663782001203718*^9}, {
+  3.663788468835526*^9, 3.663788471639999*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"nycBNcnt", " ", "=", " ", 
+   RowBox[{"Flatten", "[", 
+    RowBox[{"StringCases", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"StringCases", "[", 
+        RowBox[{"nycBN", ",", 
+         RowBox[{
+         "RegularExpression", "[", "\"\<cnt : [1-9]{2,4}\>\"", "]"}]}], "]"}],
+        "[", 
+       RowBox[{"[", "1", "]"}], "]"}], ",", " ", "NumberString"}], "]"}], 
+    "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.663781205750408*^9, 3.663781392470407*^9}, {
+  3.663781478847189*^9, 3.663781738779749*^9}, {3.663781834695922*^9, 
+  3.663781843956526*^9}, {3.6637818862846518`*^9, 3.6637819373579073`*^9}, {
+  3.6637845626904383`*^9, 3.663784573935638*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"nycBNby", " ", "=", " ", 
+   RowBox[{"Flatten", "[", 
+    RowBox[{"StringCases", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"StringCases", "[", 
+        RowBox[{"nycBN", ",", 
+         RowBox[{
+         "RegularExpression", "[", "\"\<brth_yr : [1-9]...\>\"", "]"}]}], 
+        "]"}], "[", 
+       RowBox[{"[", "1", "]"}], "]"}], ",", " ", "NumberString"}], "]"}], 
+    "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.663781205750408*^9, 3.663781392470407*^9}, {
+  3.663781478847189*^9, 3.663781738779749*^9}, {3.663781834695922*^9, 
+  3.663781843956526*^9}, {3.6637818862846518`*^9, 3.6637819373579073`*^9}, {
+  3.66378240765403*^9, 3.663782461777108*^9}, {3.66378369510647*^9, 
+  3.6637836983584146`*^9}, {3.663784053638899*^9, 3.6637840559701643`*^9}, {
+  3.6637845788009043`*^9, 3.66378459697439*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"nycBNgndr", " ", "=", " ", 
+   RowBox[{"Flatten", "[", 
+    RowBox[{"StringCases", "[", 
+     RowBox[{"nycBN", ",", 
+      RowBox[{"RegularExpression", "[", "\"\<FEMALE|MALE\>\"", "]"}]}], "]"}],
+     "]"}]}], ";"}]], "Input",
+ CellChangeTimes->CompressedData["
+1:eJxTTMoPSmViYGAQB2IQHcG8Y5W0z2vHybz8h0C0jsztMyB6y+eItyD6n0vY
+TxB9Z3bdLxB9T/rkfxD9q1ibTQZIX3j7xQFEC93b4Q6il7+6HgCidXKjA0F0
+3uxT4SCa5/a0SBCdUpoUC6IFnrangGgPnpnFIPrXyjMlILreyKMGRDv8PAim
+X7HuaADRhlvftYDo0xOudIHoR89/gWmV2syJIHpekvYcEM33rXUZiF631mYF
+WN038/0g+o/rBTC949WmwyCa5XPAERD9T0boHIhesUzxPIjW+DjjOojWa51y
+C0RHlW98AKLnOHI/BNERKy6wywLpjvabHCC6gW+GIIhOOKkvBKLNTR0VQXSm
+lqo2iC7bYmQAoplqrliAaABQ46oZ
+  "]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"nycBNrnk", " ", "=", " ", 
+   RowBox[{"Flatten", "[", 
+    RowBox[{"StringCases", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"StringCases", "[", 
+        RowBox[{"nycBN", ",", 
+         RowBox[{
+         "RegularExpression", "[", "\"\<rnk : [1-9]{2,4}\>\"", "]"}]}], "]"}],
+        "[", 
+       RowBox[{"[", "1", "]"}], "]"}], ",", " ", "NumberString"}], "]"}], 
+    "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.663781205750408*^9, 3.663781392470407*^9}, {
+   3.663781478847189*^9, 3.663781738779749*^9}, {3.663781834695922*^9, 
+   3.663781843956526*^9}, {3.6637818862846518`*^9, 3.6637819373579073`*^9}, {
+   3.66378240765403*^9, 3.663782461777108*^9}, {3.66378369510647*^9, 
+   3.6637836983584146`*^9}, {3.663784053638899*^9, 3.6637840559701643`*^9}, {
+   3.6637844264472513`*^9, 3.663784439291209*^9}, {3.66378451687471*^9, 
+   3.663784547584877*^9}, 3.663784605670957*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"nycBNnm", " ", "=", " ", 
+   RowBox[{"Flatten", "[", 
+    RowBox[{"StringSplit", "[", 
+     RowBox[{
+      RowBox[{"Flatten", "[", 
+       RowBox[{"StringCases", "[", 
+        RowBox[{"nycBN", ",", 
+         RowBox[{
+         "RegularExpression", "[", "\"\<nm : [A-Z]{2,40}\>\"", "]"}]}], "]"}],
+        "]"}], ",", " ", "\"\<nm : \>\""}], "]"}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.663781205750408*^9, 3.663781392470407*^9}, {
+   3.663781478847189*^9, 3.663781738779749*^9}, {3.663781834695922*^9, 
+   3.663781843956526*^9}, {3.6637818862846518`*^9, 3.6637819373579073`*^9}, {
+   3.66378240765403*^9, 3.663782461777108*^9}, {3.66378369510647*^9, 
+   3.6637836983584146`*^9}, {3.663784053638899*^9, 3.6637840559701643`*^9}, {
+   3.6637844264472513`*^9, 3.663784439291209*^9}, {3.66378451687471*^9, 
+   3.663784547584877*^9}, 3.663784605670957*^9, {3.663784661285101*^9, 
+   3.663784678627495*^9}, {3.663784720113632*^9, 3.6637847637328453`*^9}, {
+   3.663785011424121*^9, 3.663785134805739*^9}, {3.663785165558037*^9, 
+   3.663785344867243*^9}}]
+},
+WindowSize->{687, 848},
+WindowMargins->{{Automatic, 7}, {1, Automatic}},
+FrontEndVersion->"10.3 for Mac OS X x86 (32-bit, 64-bit Kernel) (October 9, \
+2015)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 227, 6, 28, "Input"],
+Cell[788, 28, 356, 6, 28, "Input"],
+Cell[CellGroupData[{
+Cell[1169, 38, 320, 7, 28, "Input"],
+Cell[1492, 47, 218, 4, 28, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1747, 56, 604, 10, 28, "Input"],
+Cell[2354, 68, 1196, 17, 420, "Output"]
+}, Open  ]],
+Cell[3565, 88, 254, 5, 28, "Input"],
+Cell[3822, 95, 707, 16, 63, "Input"],
+Cell[4532, 113, 509, 12, 46, "Input"],
+Cell[5044, 127, 699, 17, 97, "Input"],
+Cell[5746, 146, 846, 19, 97, "Input"],
+Cell[6595, 167, 699, 16, 28, "Input"],
+Cell[7297, 185, 921, 20, 97, "Input"],
+Cell[8221, 207, 1092, 21, 97, "Input"]
+}
+]
+*)
+
+(* End of internal cache information *)

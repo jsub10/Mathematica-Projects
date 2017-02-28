@@ -1,0 +1,1910 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     70716,       1902]
+NotebookOptionsPosition[     64066,       1684]
+NotebookOutlinePosition[     64422,       1700]
+CellTagsIndexPosition[     64379,       1697]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["The Monty Hall Problem", "Section",
+ CellChangeTimes->{{3.659544210908388*^9, 3.659544214440612*^9}}],
+
+Cell["\<\
+This statement of the problem is from Alan Downey\[CloseCurlyQuote]s book \
+Think Bayes (pp. 7-8).
+\[OpenCurlyDoubleQuote]Monty show you three closed doors and tells you that \
+there is a prize behind each door: one prize is a car, the other two are less \
+valuable prizes like peanut butter and fake finger nails. The prizes are \
+arranged at random.\
+\>", "Text",
+ CellChangeTimes->{{3.659544280842424*^9, 3.6595443866056347`*^9}, {
+  3.65954451939767*^9, 3.659544540761508*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+The object of the game is to guess which door has the car. If you guess \
+right, you get to keep the car.\
+\>", "Item",
+ CellChangeTimes->{{3.659544405297709*^9, 3.659544425876382*^9}}],
+
+Cell["\<\
+You pick a door, which we\[CloseCurlyQuote]ll call Door A. We\
+\[CloseCurlyQuote]ll call the other doors B and C.\
+\>", "Item",
+ CellChangeTimes->{{3.659544405297709*^9, 3.6595444474805326`*^9}}],
+
+Cell["\<\
+Before opening the door you choose, Monty increases the suspense by opening \
+either Door B or C, whichever does not have the car. (If the car is actually \
+behind Door A, Monty can safely open B or C, so he chooses one at random.)\
+\>", "Item",
+ CellChangeTimes->{{3.659544405297709*^9, 3.659544481640647*^9}, {
+  3.659544554373726*^9, 3.659544583902993*^9}}],
+
+Cell["\<\
+Then Monty offers you the option to stick with your original choice or switch \
+to the one remaining unopened door.\
+\>", "Item",
+ CellChangeTimes->{{3.659544405297709*^9, 3.659544481640647*^9}, {
+   3.659544554373726*^9, 3.659544600659979*^9}, {3.659544668842119*^9, 
+   3.659544682725751*^9}, 3.689419496454801*^9}]
+}, Open  ]],
+
+Cell["\<\
+The question is, should you \[OpenCurlyQuote]stick\[CloseCurlyQuote] or \
+\[OpenCurlyQuote]switch\[CloseCurlyQuote] or does it make a difference?\
+\[CloseCurlyDoubleQuote]\
+\>", "Text",
+ CellChangeTimes->{{3.659544405297709*^9, 3.659544481640647*^9}, {
+  3.659544554373726*^9, 3.659544600659979*^9}, {3.659544668842119*^9, 
+  3.659544722222301*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Using Simulation to Find the Answer", "Section",
+ CellChangeTimes->{{3.659544740763036*^9, 3.659544760734528*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"prizes", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+    "\"\<Car\>\"", ",", " ", "\"\<Peanut Butter\>\"", ",", " ", 
+     "\"\<Fake Nails\>\""}], "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.659552645354158*^9, 3.6595526628218822`*^9}}],
+
+Cell["\<\
+An initial state of the game consists of some arrangement of the items behind \
+the doors. In fact, there are only 6 possible ways to arrange these items.\
+\>", "Text",
+ CellChangeTimes->{{3.6595480797881107`*^9, 3.659548080678014*^9}, {
+  3.659550965409521*^9, 3.659551016110077*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"initialStates", " ", "=", " ", 
+  RowBox[{"Permutations", "[", "prizes", "]"}]}]], "Input",
+ CellChangeTimes->{{3.659545598409096*^9, 3.659545621234236*^9}, {
+  3.659545661135202*^9, 3.659545673923024*^9}, {3.6595526718597193`*^9, 
+  3.659552673402137*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Car\"\>"}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.659545622165827*^9, 3.6595456767910767`*^9, 
+  3.659552674299786*^9}]
+}, Open  ]],
+
+Cell["\<\
+Let\[CloseCurlyQuote]s say that the first position of each list is Door A, \
+the second position is Door B, and the third position of each list is Door C. \
+Let\[CloseCurlyQuote]s give each initial state the same probability as every \
+other initial state and generate a whole bunch of these initial states (Monty \
+is going to play a large number of games with contestants).\
+\>", "Text",
+ CellChangeTimes->{{3.65954572077061*^9, 3.659545837163487*^9}, {
+  3.65954594412536*^9, 3.659545968811881*^9}, {3.659546339204452*^9, 
+  3.6595463488587217`*^9}, {3.6595465602566023`*^9, 3.659546573478045*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"numGames", " ", "=", " ", "100000"}], ";"}]], "Input",
+ CellChangeTimes->{{3.659546329354682*^9, 3.65954633110211*^9}, {
+   3.659546379541203*^9, 3.65954639044024*^9}, 3.6595465910023003`*^9, 
+   3.6595466212947483`*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"startingStates", " ", "=", " ", 
+   RowBox[{"RandomChoice", "[", 
+    RowBox[{"initialStates", ",", " ", "numGames"}], "]"}]}], ";"}]], "Input",\
+
+ CellChangeTimes->{{3.659545841604702*^9, 3.659545929654562*^9}, {
+  3.659545973596333*^9, 3.659545975658546*^9}, {3.659546090463059*^9, 
+  3.659546095773428*^9}, {3.65954640145474*^9, 3.65954640278996*^9}}],
+
+Cell["\<\
+The starting states look pretty much like you\[CloseCurlyQuote]d expect them \
+to -- here\[CloseCurlyQuote]s a random sampling of 10 of them.\
+\>", "Text",
+ CellChangeTimes->{{3.659546128673593*^9, 3.659546201215913*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"sampleStartingStates", " ", "=", " ", 
+  RowBox[{"RandomChoice", "[", 
+   RowBox[{"startingStates", ",", " ", "10"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.659546180967327*^9, 3.6595462108307753`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Fake Nails\"\>"}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.659546212494935*^9, 3.65954641170837*^9, {3.659546601178526*^9, 
+   3.6595466299475107`*^9}}]
+}, Open  ]],
+
+Cell["\<\
+No surprise, each contains the items that Monty is going to use, each time he \
+plays the game with a contestant.\
+\>", "Text",
+ CellChangeTimes->{{3.6595462166121893`*^9, 3.6595462571245823`*^9}}],
+
+Cell["\<\
+And just to check, what\[CloseCurlyQuote]s the probability of the car being \
+behind Door A? It should be a 1/3rd shouldn\[CloseCurlyQuote]t it?\
+\>", "Text",
+ CellChangeTimes->{{3.659546262200626*^9, 3.6595463062828417`*^9}, {
+  3.6595464315145273`*^9, 3.659546447452169*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"N", "[", 
+  RowBox[{
+   RowBox[{"Count", "[", 
+    RowBox[{"startingStates", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<Car\>\"", ",", " ", "_", ",", " ", "_"}], "}"}]}], "]"}], 
+   "/", "numGames"}], "]"}]], "Input",
+ CellChangeTimes->{{3.659546457457471*^9, 3.659546534040852*^9}}],
+
+Cell[BoxData["0.33515`"], "Output",
+ CellChangeTimes->{
+  3.659546496991736*^9, 3.659546535110209*^9, {3.659546611340295*^9, 
+   3.659546634304371*^9}}]
+}, Open  ]],
+
+Cell["\<\
+Well, close enough to a third -- the world\[CloseCurlyQuote]s a messy place. \
+Just for kicks, let\[CloseCurlyQuote]s check the probability of the car \
+appearing at Doors B and C too.\
+\>", "Text",
+ CellChangeTimes->{{3.659546640032786*^9, 3.659546687085951*^9}, {
+  3.6595468130208197`*^9, 3.659546815889584*^9}}],
+
+Cell["The probability of the car being behind Door B is:", "Text",
+ CellChangeTimes->{{3.659546695028956*^9, 3.659546714340583*^9}, {
+  3.659546768212866*^9, 3.659546768389187*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"N", "[", 
+  RowBox[{
+   RowBox[{"Count", "[", 
+    RowBox[{"startingStates", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"_", ",", "\"\<Car\>\"", ",", " ", "_"}], "}"}]}], "]"}], "/", 
+   "numGames"}], "]"}]], "Input",
+ CellChangeTimes->{{3.659546457457471*^9, 3.659546534040852*^9}, {
+  3.659546731637651*^9, 3.6595467412078114`*^9}}],
+
+Cell[BoxData["0.33478`"], "Output",
+ CellChangeTimes->{3.6595467459718533`*^9}]
+}, Open  ]],
+
+Cell["And the probability of the car being behind Door C is:", "Text",
+ CellChangeTimes->{{3.659546759118958*^9, 3.65954678137814*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"N", "[", 
+  RowBox[{
+   RowBox[{"Count", "[", 
+    RowBox[{"startingStates", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"_", ",", "_", ",", "\"\<Car\>\""}], "}"}]}], "]"}], "/", 
+   "numGames"}], "]"}]], "Input",
+ CellChangeTimes->{{3.659546457457471*^9, 3.659546534040852*^9}, {
+  3.659546731637651*^9, 3.6595467412078114`*^9}, {3.659546793476918*^9, 
+  3.6595467991602783`*^9}}],
+
+Cell[BoxData["0.33007`"], "Output",
+ CellChangeTimes->{3.6595468006338263`*^9}]
+}, Open  ]],
+
+Cell["\<\
+So we\[CloseCurlyQuote]ve validated the intuition that the car is randomly \
+placed behind a door; or to put it another way, it has an equal probability \
+(roughly speaking) of appearing behind any one of the doors.
+We\[CloseCurlyQuote]ll come back to this \[OpenCurlyDoubleQuote]roughly \
+speaking\[CloseCurlyDoubleQuote] later to illustrate a point between \
+probability theory and applying this theory in the real world.\
+\>", "Text",
+ CellChangeTimes->{{3.6595468230863457`*^9, 3.6595468900981417`*^9}, {
+  3.659546984882413*^9, 3.6595470912678213`*^9}, {3.659547987811548*^9, 
+  3.659547994406005*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{
+   "Choose", " ", "a", " ", "starting", " ", "state", " ", "to", " ", "begin",
+     " ", "the", " ", 
+    RowBox[{"game", " ", "--"}], " ", "this", " ", "is", " ", "what", " ", 
+    "Monty", " ", "does"}], " ", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{"start", " ", "=", " ", 
+   RowBox[{"RandomChoice", "[", "startingStates", "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.659551040414843*^9, 3.659551098694977*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"Car\"\>", ",", "\<\"Fake Nails\"\>", 
+   ",", "\<\"Peanut Butter\"\>"}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.659551103932012*^9, {3.659551146801928*^9, 3.659551163625105*^9}, 
+   3.659553124873798*^9}]
+}, Open  ]],
+
+Cell["\<\
+O.K. so the car is behind a particular door and Monty knows this. Now you get \
+to make your choice.\
+\>", "Text",
+ CellChangeTimes->{{3.659551107602248*^9, 3.659551175442782*^9}, {
+  3.659551236259935*^9, 3.659551241674877*^9}, {3.6894223314914207`*^9, 
+  3.6894223374656887`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"contestantChoice", " ", "=", " ", 
+  RowBox[{"RandomChoice", "[", "start", "]"}]}]], "Input",
+ CellChangeTimes->{{3.659551249079104*^9, 3.65955130462144*^9}, {
+  3.6595516100267563`*^9, 3.6595516133305063`*^9}}],
+
+Cell[BoxData["\<\"Car\"\>"], "Output",
+ CellChangeTimes->{{3.659551306761862*^9, 3.659551311282812*^9}, {
+   3.6595516141630507`*^9, 3.659551623516176*^9}, 3.6595531298822317`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "There are two cases to consider.\nCase 1: The contestant ",
+ StyleBox["does not ",
+  FontSlant->"Italic"],
+ "choose the car. In this case, the only option Monty has is to open the door \
+that is not the car and also not the contestant\[CloseCurlyQuote]s choice.\n\
+Case 2: The contestant chooses the car. In this case, Monty has a choice of \
+opening either of the two other doors that don\[CloseCurlyQuote]t have the \
+car behind them. Let\[CloseCurlyQuote]s say he chooses randomly between these \
+possibilities - they\[CloseCurlyQuote]re both equally bad in comparison to \
+the valuable car so why not just toss a coin?\nLet\[CloseCurlyQuote]s put \
+this into code."
+}], "Text",
+ CellChangeTimes->{{3.659552084413452*^9, 3.659552259203783*^9}, {
+  3.6595523966929197`*^9, 3.659552526915194*^9}, {3.659553297509038*^9, 
+  3.659553359817287*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"If", "[", 
+  RowBox[{
+   RowBox[{"contestantChoice", " ", "\[NotEqual]", " ", "\"\<Car\>\""}], ",", 
+   " ", 
+   RowBox[{"montyOpens", " ", "=", " ", 
+    RowBox[{"Select", "[", 
+     RowBox[{"prizes", ",", " ", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"#", " ", "\[NotEqual]", " ", "\"\<Car\>\""}], " ", "&&", " ", 
+        RowBox[{"#", " ", "\[NotEqual]", " ", "contestantChoice"}]}], " ", 
+       "&"}]}], "]"}]}], ",", " ", 
+   RowBox[{"montyOpens", " ", "=", " ", 
+    RowBox[{"RandomChoice", "[", 
+     RowBox[{"Complement", "[", 
+      RowBox[{"prizes", ",", " ", 
+       RowBox[{"{", "contestantChoice", "}"}]}], "]"}], "]"}]}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.659552554766564*^9, 3.659552602326252*^9}, {
+  3.659552806559856*^9, 3.659553008787137*^9}, {3.6595532201981497`*^9, 
+  3.6595532265463533`*^9}, {3.6595532567241697`*^9, 3.659553282848379*^9}}],
+
+Cell[BoxData["\<\"Peanut Butter\"\>"], "Output",
+ CellChangeTimes->{
+  3.659553054908832*^9, 3.659553144228891*^9, {3.6595532376502113`*^9, 
+   3.659553283965328*^9}}]
+}, Open  ]],
+
+Cell["\<\
+Now the contestant is given a choice to switch from his or her original \
+choice. He or she can switch from the original choice or stick with the \
+original choice. Let\[CloseCurlyQuote]s code it.\
+\>", "Text",
+ CellChangeTimes->{{3.6595533693032084`*^9, 3.659553399775494*^9}, {
+  3.6595534665835342`*^9, 3.6595534716826677`*^9}, {3.65955369260081*^9, 
+  3.659553715060384*^9}, {3.659553760218247*^9, 3.659553807434486*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"switchResult", " ", "=", " ", 
+  RowBox[{"First", "[", 
+   RowBox[{"Complement", "[", 
+    RowBox[{"prizes", ",", " ", 
+     RowBox[{"Union", "[", 
+      RowBox[{
+       RowBox[{"{", "contestantChoice", "}"}], ",", " ", 
+       RowBox[{"{", "montyOpens", "}"}]}], "]"}]}], "]"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.6595538122998457`*^9, 3.65955391844781*^9}, {
+  3.659555766501033*^9, 3.6595557717955837`*^9}}],
+
+Cell[BoxData["\<\"Fake Nails\"\>"], "Output",
+ CellChangeTimes->{3.6595539192877493`*^9, 3.659555772706349*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"noSwitchResult", " ", "=", " ", "contestantChoice"}]], "Input",
+ CellChangeTimes->{{3.659553947143058*^9, 3.65955395950072*^9}}],
+
+Cell[BoxData["\<\"Car\"\>"], "Output",
+ CellChangeTimes->{3.659553963500655*^9}]
+}, Open  ]],
+
+Cell["\<\
+That\[CloseCurlyQuote]s one complete game. So let\[CloseCurlyQuote]s make \
+this game into a function and play it many times to compare the results we \
+get when the contestant. \
+\>", "Text",
+ CellChangeTimes->{{3.6595539844385567`*^9, 3.659554020477653*^9}, 
+   3.6595542229477*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"playMontyHall", "[", "startingState_", "]"}], ":=", " ", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+      "contestantChoice", ",", " ", "montyOpens", ",", " ", "switchResult", 
+       ",", " ", "noSwitchResult"}], "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"contestantChoice", " ", "=", " ", 
+       RowBox[{"RandomChoice", "[", "startingState", "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"contestantChoice", " ", "\[NotEqual]", " ", "\"\<Car\>\""}], 
+        ",", " ", 
+        RowBox[{"montyOpens", " ", "=", " ", 
+         RowBox[{"First", "[", 
+          RowBox[{"Select", "[", 
+           RowBox[{"startingState", ",", " ", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"#", " ", "\[NotEqual]", " ", "\"\<Car\>\""}], " ", "&&",
+               " ", 
+              RowBox[{"#", " ", "\[NotEqual]", " ", "contestantChoice"}]}], 
+             " ", "&"}]}], "]"}], "]"}]}], ",", " ", 
+        RowBox[{"montyOpens", " ", "=", " ", 
+         RowBox[{"RandomChoice", "[", 
+          RowBox[{"Complement", "[", 
+           RowBox[{"startingState", ",", " ", 
+            RowBox[{"{", "contestantChoice", "}"}]}], "]"}], "]"}]}]}], "]"}],
+       ";", "\[IndentingNewLine]", 
+      RowBox[{"switchResult", " ", "=", " ", 
+       RowBox[{"First", "[", 
+        RowBox[{"Complement", "[", 
+         RowBox[{"startingState", ",", " ", 
+          RowBox[{"Union", "[", 
+           RowBox[{
+            RowBox[{"{", "contestantChoice", "}"}], ",", " ", 
+            RowBox[{"{", "montyOpens", "}"}]}], "]"}]}], "]"}], "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"noSwitchResult", " ", "=", " ", "contestantChoice"}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"\"\<Contestant's Choice\>\"", ",", "contestantChoice"}], 
+         "}"}], ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Monty Opens\>\"", ",", " ", "montyOpens"}], "}"}], ",", 
+        " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Prize for Switching\>\"", ",", "switchResult"}], "}"}], 
+        ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Prize for Not Switching\>\"", ",", "noSwitchResult"}], 
+         "}"}]}], "}"}]}]}], "\[IndentingNewLine]", "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.659554227417685*^9, 3.659554259261587*^9}, {
+  3.659554328519479*^9, 3.659554336395212*^9}, {3.659554369605687*^9, 
+  3.659554436369402*^9}, {3.659554499688048*^9, 3.6595545515919847`*^9}, {
+  3.6595545883710546`*^9, 3.6595547028278837`*^9}, {3.659554917521941*^9, 
+  3.659554942171254*^9}, {3.6595550544435368`*^9, 3.6595551143801317`*^9}, {
+  3.659555325916689*^9, 3.659555345459412*^9}, {3.659555409981258*^9, 
+  3.659555415418147*^9}, {3.659555448381606*^9, 3.659555502113249*^9}, {
+  3.659555583760717*^9, 3.659555588807085*^9}, {3.6595556363967047`*^9, 
+  3.659555652691135*^9}, {3.659555727110785*^9, 3.659555756343958*^9}, {
+  3.6595557976628532`*^9, 3.659555873667623*^9}}],
+
+Cell["Let\[CloseCurlyQuote]s test it out. ", "Text",
+ CellChangeTimes->{{3.659554711879924*^9, 3.659554729308379*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"playMontyHall", "[", 
+  RowBox[{"startingStates", "[", 
+   RowBox[{"[", "5", "]"}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.659554733238042*^9, 3.6595547352376966`*^9}, {
+  3.659554789378124*^9, 3.659554800557369*^9}, {3.6595551931910257`*^9, 
+  3.659555193965523*^9}, {3.659555903891711*^9, 3.6595559064281607`*^9}, {
+  3.6595559545081997`*^9, 3.659555981986796*^9}, {3.65955626614146*^9, 
+  3.659556267691966*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Contestant's Choice\"\>", ",", "\<\"Peanut Butter\"\>"}], 
+    "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Monty Opens\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Prize for Switching\"\>", ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Prize for Not Switching\"\>", ",", "\<\"Peanut Butter\"\>"}],
+     "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.659554803010277*^9, 3.6595549508224497`*^9, {3.659555070746896*^9, 
+   3.659555145673738*^9}, 3.659555195239867*^9, 3.659555353356447*^9, {
+   3.659555420487936*^9, 3.659555428097386*^9}, {3.659555472692563*^9, 
+   3.659555506529248*^9}, 3.659555546702183*^9, 3.659555595083699*^9, {
+   3.659555661434761*^9, 3.659555686043932*^9}, {3.659555732046362*^9, 
+   3.659555760912425*^9}, {3.659555884794155*^9, 3.659555982741002*^9}, 
+   3.6595562685874977`*^9}]
+}, Open  ]],
+
+Cell["\<\
+Now let\[CloseCurlyQuote]s play all the games we\[CloseCurlyQuote]ve set up \
+and see how we do when we switch versus not switch.\
+\>", "Text",
+ CellChangeTimes->{{3.659555995667357*^9, 3.659556036615487*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"results", " ", "=", " ", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"playMontyHall", "[", "#", "]"}], " ", "&"}], "/@", " ", 
+    "startingStates"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6595560605436497`*^9, 3.6595561079919367`*^9}}],
+
+Cell["\<\
+When we SWITCHED, what percentage of the time did we win the car?\
+\>", "Text",
+ CellChangeTimes->{{3.6595561493805017`*^9, 3.659556180446493*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"switchSuccessRate", " ", "=", " ", 
+  RowBox[{"N", "[", 
+   RowBox[{
+    RowBox[{"Length", "[", 
+     RowBox[{"Select", "[", 
+      RowBox[{"results", ",", " ", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"#", "[", 
+          RowBox[{"[", 
+           RowBox[{"3", ",", "2"}], "]"}], "]"}], " ", "\[Equal]", " ", 
+         "\"\<Car\>\""}], " ", "&"}]}], "]"}], "]"}], "/", "numGames"}], 
+   "]"}]}]], "Input",
+ CellChangeTimes->{{3.6595562326073027`*^9, 3.659556242964522*^9}, {
+  3.659556347491596*^9, 3.659556431461886*^9}}],
+
+Cell[BoxData["0.66526`"], "Output",
+ CellChangeTimes->{{3.659556399354995*^9, 3.659556437309081*^9}}]
+}, Open  ]],
+
+Cell["\<\
+When we DID NOT SWITCH, what percentage of the time did we win the car?\
+\>", "Text",
+ CellChangeTimes->{{3.6595564442346888`*^9, 3.6595564685375834`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"noSwitchSuccessRate", " ", "=", " ", 
+  RowBox[{"N", "[", 
+   RowBox[{
+    RowBox[{"Length", "[", 
+     RowBox[{"Select", "[", 
+      RowBox[{"results", ",", " ", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"#", "[", 
+          RowBox[{"[", 
+           RowBox[{"4", ",", " ", "2"}], "]"}], "]"}], " ", "\[Equal]", "  ", 
+         "\"\<Car\>\""}], " ", "&"}]}], "]"}], "]"}], "/", "numGames"}], 
+   "]"}]}]], "Input",
+ CellChangeTimes->{{3.659556481075025*^9, 3.659556525501514*^9}}],
+
+Cell[BoxData["0.33474`"], "Output",
+ CellChangeTimes->{3.659556549228862*^9}]
+}, Open  ]],
+
+Cell["\<\
+So switching is about twice more likely to lead to success than not \
+switching. One of those highly counterintuitive results validated by \
+simulation from the ground up.\
+\>", "Text",
+ CellChangeTimes->{{3.65955657586777*^9, 3.659556624136854*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Exercise 1", "Section",
+ CellChangeTimes->{{3.659629244726293*^9, 3.659629250628487*^9}}],
+
+Cell["\<\
+What about other strategies? The nice thing about simulation is that it gives \
+us the ability to investigate these other possibilities fairly easily. 
+Strategy 1: Contestant randomly picks a door and then switches his choice \
+after Monty opens another door. We've seen that this strategy is twice more \
+effective than Strategy 2 below.
+Strategy 2: Contestant randomly picks a door and then sticks to that choice \
+even after Monty opens another door. 
+Strategy 3: Contestant always picks a particular door and sticks to that \
+choice.\
+\>", "Text"],
+
+Cell["\<\
+Strategy 4: Contestant always picks a particular door and then switches to \
+the other door. \
+\>", "Text",
+ CellChangeTimes->{{3.659563894957295*^9, 3.659563905077835*^9}, {
+  3.6595654041511803`*^9, 3.659565465265164*^9}, {3.659565495702479*^9, 
+  3.659565523728312*^9}}],
+
+Cell["Let\[CloseCurlyQuote]s see how strategy 3 and 4 work out.", "Text",
+ CellChangeTimes->{{3.6595655275581617`*^9, 3.659565564657197*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"playMontyHall3", "[", "startingState_", "]"}], ":=", " ", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+      "contestantChoice", ",", " ", "montyOpens", ",", " ", "switchResult", 
+       ",", " ", "noSwitchResult"}], "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+      "Used", " ", "to", " ", "be", " ", "the", " ", "following", " ", "for", 
+       " ", "Strategy", " ", "1", " ", "and", " ", "2"}], " ", "*)"}], 
+     "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+       RowBox[{"contestantChoice", " ", "=", " ", 
+        RowBox[{"RandomChoice", "[", "startingState", "]"}]}], ";"}], " ", 
+      "*)"}], "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+      "Now", " ", "changed", " ", "to", " ", "the", " ", "following", " ", 
+       "for", " ", "Stragey", " ", "3", " ", "and", " ", "4"}], " ", "*)"}], 
+     "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+      "Contestant", " ", "always", " ", "picks", " ", "the", " ", "third", 
+       " ", "door"}], " ", "*)"}], "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"contestantChoice", " ", "=", " ", 
+       RowBox[{"startingState", "[", 
+        RowBox[{"[", "3", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"contestantChoice", " ", "\[NotEqual]", " ", "\"\<Car\>\""}], 
+        ",", " ", 
+        RowBox[{"montyOpens", " ", "=", " ", 
+         RowBox[{"First", "[", 
+          RowBox[{"Select", "[", 
+           RowBox[{"startingState", ",", " ", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"#", " ", "\[NotEqual]", " ", "\"\<Car\>\""}], " ", "&&",
+               " ", 
+              RowBox[{"#", " ", "\[NotEqual]", " ", "contestantChoice"}]}], 
+             " ", "&"}]}], "]"}], "]"}]}], ",", " ", 
+        RowBox[{"montyOpens", " ", "=", " ", 
+         RowBox[{"RandomChoice", "[", 
+          RowBox[{"Complement", "[", 
+           RowBox[{"startingState", ",", " ", 
+            RowBox[{"{", "contestantChoice", "}"}]}], "]"}], "]"}]}]}], "]"}],
+       ";", "\[IndentingNewLine]", 
+      RowBox[{"switchResult", " ", "=", " ", 
+       RowBox[{"First", "[", 
+        RowBox[{"Complement", "[", 
+         RowBox[{"startingState", ",", " ", 
+          RowBox[{"Union", "[", 
+           RowBox[{
+            RowBox[{"{", "contestantChoice", "}"}], ",", " ", 
+            RowBox[{"{", "montyOpens", "}"}]}], "]"}]}], "]"}], "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"noSwitchResult", " ", "=", " ", "contestantChoice"}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"\"\<Contestant's Choice\>\"", ",", "contestantChoice"}], 
+         "}"}], ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Monty Opens\>\"", ",", " ", "montyOpens"}], "}"}], ",", 
+        " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Prize for Switching\>\"", ",", "switchResult"}], "}"}], 
+        ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Prize for Not Switching\>\"", ",", "noSwitchResult"}], 
+         "}"}]}], "}"}]}]}], "\[IndentingNewLine]", "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.659565678617857*^9, 3.659565803831748*^9}, {
+  3.6595663475720243`*^9, 3.6595663778256197`*^9}, {3.659566427958346*^9, 
+  3.6595664297896233`*^9}}],
+
+Cell["Now play a lot of games...", "Text",
+ CellChangeTimes->{{3.659565853653799*^9, 3.6595658626063957`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"results3", " ", "=", " ", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"playMontyHall3", "[", "#", "]"}], " ", "&"}], "/@", " ", 
+    "startingStates"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6595560605436497`*^9, 3.6595561079919367`*^9}, {
+  3.6595658680449457`*^9, 3.6595658781330633`*^9}}],
+
+Cell["... and see the percentage of wins when SWITCHING", "Text",
+ CellChangeTimes->{{3.659565886829121*^9, 3.659565918286244*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"switchSuccessRate3", " ", "=", " ", 
+  RowBox[{"N", "[", 
+   RowBox[{
+    RowBox[{"Length", "[", 
+     RowBox[{"Select", "[", 
+      RowBox[{"results3", ",", " ", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"#", "[", 
+          RowBox[{"[", 
+           RowBox[{"3", ",", "2"}], "]"}], "]"}], " ", "\[Equal]", " ", 
+         "\"\<Car\>\""}], " ", "&"}]}], "]"}], "]"}], "/", "numGames"}], 
+   "]"}]}]], "Input",
+ CellChangeTimes->{{3.659565943472116*^9, 3.6595659522869587`*^9}}],
+
+Cell[BoxData["0.66993`"], "Output",
+ CellChangeTimes->{
+  3.659565955460204*^9, {3.659566361919104*^9, 3.659566399290921*^9}}]
+}, Open  ]],
+
+Cell["... and the percentage of wins when NOT SWITCHING", "Text",
+ CellChangeTimes->{{3.659565976281333*^9, 3.659565990109769*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"noSwitchSuccessRate3", " ", "=", " ", 
+  RowBox[{"N", "[", 
+   RowBox[{
+    RowBox[{"Length", "[", 
+     RowBox[{"Select", "[", 
+      RowBox[{"results3", ",", " ", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"#", "[", 
+          RowBox[{"[", 
+           RowBox[{"4", ",", " ", "2"}], "]"}], "]"}], " ", "\[Equal]", "  ", 
+         "\"\<Car\>\""}], " ", "&"}]}], "]"}], "]"}], "/", "numGames"}], 
+   "]"}]}]], "Input",
+ CellChangeTimes->{{3.659556481075025*^9, 3.659556525501514*^9}, {
+  3.659566025683816*^9, 3.6595660284258947`*^9}}],
+
+Cell[BoxData["0.33007`"], "Output",
+ CellChangeTimes->{
+  3.6595660300446568`*^9, {3.659566365672188*^9, 3.659566395599017*^9}}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"successRateMontyHall", "[", "outputOfGames_", "]"}], ":=", " ", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"switchSuccessRate", ",", " ", "noSwitchSuccessRate"}], "}"}], 
+     ",", "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+      "outputOfGames", " ", "is", " ", "the", " ", "output", " ", "of", " ", 
+       "the", " ", "playMontyHall", " ", "function", " ", "for", " ", 
+       "multiple", " ", "games"}], " ", "*)"}], "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"switchSuccessRate", " ", "=", " ", 
+       RowBox[{"N", "[", 
+        RowBox[{
+         RowBox[{"Length", "[", 
+          RowBox[{"Select", "[", 
+           RowBox[{"outputOfGames", ",", " ", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"#", "[", 
+               RowBox[{"[", 
+                RowBox[{"3", ",", "2"}], "]"}], "]"}], " ", "\[Equal]", " ", 
+              "\"\<Car\>\""}], " ", "&"}]}], "]"}], "]"}], "/", "numGames"}], 
+        "]"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"noSwitchSuccessRate", " ", "=", " ", 
+       RowBox[{"N", "[", 
+        RowBox[{
+         RowBox[{"Length", "[", 
+          RowBox[{"Select", "[", 
+           RowBox[{"outputOfGames", ",", " ", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"#", "[", 
+               RowBox[{"[", 
+                RowBox[{"4", ",", "2"}], "]"}], "]"}], " ", "\[Equal]", " ", 
+              "\"\<Car\>\""}], " ", "&"}]}], "]"}], "]"}], "/", "numGames"}], 
+        "]"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{
+         "\"\<Success Rate for Switching\>\"", ",", " ", 
+          "switchSuccessRate"}], "}"}], ",", " ", 
+        RowBox[{"{", 
+         RowBox[{
+         "\"\<Success Rate for NOT Switching\>\"", ",", " ", 
+          "noSwitchSuccessRate"}], "}"}]}], "}"}]}]}], "\[IndentingNewLine]", 
+    "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6595668461757097`*^9, 3.659566912361788*^9}, {
+  3.659566989247477*^9, 3.659567220872657*^9}, {3.659643482649005*^9, 
+  3.659643501440526*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"successRateMontyHall", "[", "results", "]"}]], "Input",
+ CellChangeTimes->{{3.659567246439116*^9, 3.65956725624752*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Success Rate for Switching\"\>", ",", "0.66485`"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Success Rate for NOT Switching\"\>", ",", "0.33515`"}], 
+    "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.6595672573933773`*^9}]
+}, Open  ]],
+
+Cell["\<\
+We see that it barely makes a difference if the contestant just picks the \
+same door every time; switching still boosts the probability of winning \
+greatly; but it also seems like the contestant\[CloseCurlyQuote]s reasonable \
+prior probability of 1/3 is of no use at all.
+[Just for kicks, does it make any difference if the contestant always picks \
+the 2nd door (instead of the first door)? It shouldn\[CloseCurlyQuote]t but \
+we may find something here to surprise us, who knows. We checked, and it didn\
+\[CloseCurlyQuote]t matter at all.]
+Let\[CloseCurlyQuote]s try a final type of strategy. In this one, the \
+contestant has some very particular prior distribution in choosing between \
+the 3 doors. This can be a whole family of priors, but we can capture the \
+general strategy as follows.\
+\>", "Text",
+ CellChangeTimes->{{3.6595660380665092`*^9, 3.65956633543365*^9}, {
+  3.659566404515065*^9, 3.659566419365622*^9}, {3.659566450993801*^9, 
+  3.659566466043734*^9}, {3.6595665281243467`*^9, 3.6595666087278223`*^9}, {
+  3.6641011546284723`*^9, 3.664101166688483*^9}}],
+
+Cell["\<\
+Strategy 5: The contestant chooses a door initially according to the \
+following probability distribution: P(door A) = a, P(door B) = b, P(door C) = \
+c.  \
+\>", "Text",
+ CellChangeTimes->{{3.6595666126848173`*^9, 3.659566616093815*^9}, {
+  3.659566669049838*^9, 3.659566738841831*^9}, {3.659567281184617*^9, 
+  3.6595672876709423`*^9}, {3.689447390993134*^9, 3.689447400174946*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"playMontyHall5", "[", 
+    RowBox[{"startingState_", ",", " ", "priors_"}], "]"}], ":=", " ", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+      "contestantChoice", ",", " ", "montyOpens", ",", " ", "switchResult", 
+       ",", " ", "noSwitchResult"}], "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+      "priors", " ", "is", " ", "the", " ", "probability", " ", "with", " ", 
+       "which", " ", "the", " ", "contestant", " ", "picks", " ", "each", " ",
+        "door"}], " ", "*)"}], "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+       RowBox[{"priors", " ", "are", " ", "input", " ", "as"}], ",", " ", 
+       RowBox[{"for", " ", "example"}], ",", "  ", 
+       RowBox[{"{", 
+        RowBox[{"0.2", ",", " ", "0.3", ",", " ", "0.5"}], "}"}]}], " ", 
+      "*)"}], "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"contestantChoice", " ", "=", " ", 
+       RowBox[{"RandomChoice", "[", 
+        RowBox[{"priors", " ", "\[Rule]", " ", "startingState"}], "]"}]}], 
+      ";", "\[IndentingNewLine]", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"contestantChoice", " ", "\[NotEqual]", " ", "\"\<Car\>\""}], 
+        ",", " ", 
+        RowBox[{"montyOpens", " ", "=", " ", 
+         RowBox[{"First", "[", 
+          RowBox[{"Select", "[", 
+           RowBox[{"startingState", ",", " ", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"#", " ", "\[NotEqual]", " ", "\"\<Car\>\""}], " ", "&&",
+               " ", 
+              RowBox[{"#", " ", "\[NotEqual]", " ", "contestantChoice"}]}], 
+             " ", "&"}]}], "]"}], "]"}]}], ",", " ", 
+        RowBox[{"montyOpens", " ", "=", " ", 
+         RowBox[{"RandomChoice", "[", 
+          RowBox[{"Complement", "[", 
+           RowBox[{"startingState", ",", " ", 
+            RowBox[{"{", "contestantChoice", "}"}]}], "]"}], "]"}]}]}], "]"}],
+       ";", "\[IndentingNewLine]", 
+      RowBox[{"switchResult", " ", "=", " ", 
+       RowBox[{"First", "[", 
+        RowBox[{"Complement", "[", 
+         RowBox[{"startingState", ",", " ", 
+          RowBox[{"Union", "[", 
+           RowBox[{
+            RowBox[{"{", "contestantChoice", "}"}], ",", " ", 
+            RowBox[{"{", "montyOpens", "}"}]}], "]"}]}], "]"}], "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"noSwitchResult", " ", "=", " ", "contestantChoice"}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"\"\<Contestant's Choice\>\"", ",", "contestantChoice"}], 
+         "}"}], ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Monty Opens\>\"", ",", " ", "montyOpens"}], "}"}], ",", 
+        " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Prize for Switching\>\"", ",", "switchResult"}], "}"}], 
+        ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Prize for Not Switching\>\"", ",", "noSwitchResult"}], 
+         "}"}]}], "}"}]}]}], "\[IndentingNewLine]", "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6595674189772377`*^9, 3.659567554284238*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"playMontyHall5", "[", 
+  RowBox[{
+   RowBox[{"startingStates", "[", 
+    RowBox[{"[", "5", "]"}], "]"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"0.3", ",", " ", "0.5", ",", " ", "0.2"}], "}"}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.65956758823687*^9, 3.6595676506023703`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Contestant's Choice\"\>", ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Monty Opens\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Prize for Switching\"\>", ",", "\<\"Peanut Butter\"\>"}], 
+    "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Prize for Not Switching\"\>", ",", "\<\"Car\"\>"}], "}"}]}], 
+  "}"}]], "Output",
+ CellChangeTimes->{3.659567652303783*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"results5", " ", "=", " ", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"playMontyHall5", "[", 
+      RowBox[{"#", ",", " ", 
+       RowBox[{"{", 
+        RowBox[{"0.25", ",", " ", "0.5", ",", " ", "0.25"}], "}"}]}], "]"}], 
+     " ", "&"}], " ", "/@", " ", "startingStates"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.65956758823687*^9, 3.6595676506023703`*^9}, {
+  3.659567688863757*^9, 3.6595677152292*^9}, {3.659567841366598*^9, 
+  3.659567878541337*^9}, {3.6595680510504227`*^9, 3.659568125457243*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"successRateMontyHall", "[", "results5", "]"}]], "Input",
+ CellChangeTimes->{{3.659567770892351*^9, 3.659567787232869*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Success Rate for Switching\"\>", ",", "0.66738`"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Success Rate for NOT Switching\"\>", ",", "0.33262`"}], 
+    "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.659567788361267*^9, 3.6595678623646517`*^9, 
+  3.659567896243829*^9, 3.659568100594803*^9, 3.659568136651299*^9}]
+}, Open  ]],
+
+Cell["\<\
+The success rates are remarkably immune to the strategy by which the \
+contestant makes his first choice. Rather, they are completely determined by \
+whether the contestant chooses to switch or not switch.\
+\>", "Text",
+ CellChangeTimes->{{3.659568146952065*^9, 3.659568235445201*^9}, {
+  3.65962919419906*^9, 3.659629197610602*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Exercise 2", "Section",
+ CellChangeTimes->{{3.6596292065119553`*^9, 3.659629209063418*^9}}],
+
+Cell["\<\
+What happens when there are more than 3 doors? Is switching still the best \
+strategy?\
+\>", "Text",
+ CellChangeTimes->{{3.659629263913059*^9, 3.659629295361123*^9}}],
+
+Cell["\<\
+Let\[CloseCurlyQuote]s expand the problem to 4 doors -- \
+we\[CloseCurlyQuote]ll add another relatively worthless prize. \
+\>", "Text",
+ CellChangeTimes->{{3.659642611557487*^9, 3.6596426291652193`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"prizes4", " ", "=", " ", 
+  RowBox[{"{", 
+   RowBox[{
+   "\"\<Car\>\"", ",", " ", "\"\<Peanut Butter\>\"", ",", " ", 
+    "\"\<Fake Nails\>\"", ",", " ", "\"\<Boiled Egg\>\""}], "}"}]}]], "Input",\
+
+ CellChangeTimes->{{3.659552645354158*^9, 3.6595526628218822`*^9}, {
+   3.6596426799794617`*^9, 3.659642726732853*^9}, 3.659642764059269*^9, {
+   3.6596429648797483`*^9, 3.6596429650371733`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>", 
+   ",", "\<\"Fake Nails\"\>", ",", "\<\"Boiled Egg\"\>"}], "}"}]], "Output",
+ CellChangeTimes->{3.659642765024372*^9, 3.6596429666435823`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"initialStates4", " ", "=", " ", 
+  RowBox[{"Permutations", "[", "prizes4", "]"}]}]], "Input",
+ CellChangeTimes->{{3.659545598409096*^9, 3.659545621234236*^9}, {
+  3.659545661135202*^9, 3.659545673923024*^9}, {3.6595526718597193`*^9, 
+  3.659552673402137*^9}, {3.659642757733407*^9, 3.6596427613644238`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Fake Nails\"\>", ",", "\<\"Boiled Egg\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Boiled Egg\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Peanut Butter\"\>", ",", "\<\"Boiled Egg\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Boiled Egg\"\>", ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Boiled Egg\"\>", 
+     ",", "\<\"Peanut Butter\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Boiled Egg\"\>", 
+     ",", "\<\"Fake Nails\"\>", ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Fake Nails\"\>", ",", "\<\"Boiled Egg\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Boiled Egg\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Car\"\>", ",", "\<\"Boiled Egg\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Boiled Egg\"\>", ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Boiled Egg\"\>", 
+     ",", "\<\"Car\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Boiled Egg\"\>", 
+     ",", "\<\"Fake Nails\"\>", ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Peanut Butter\"\>", ",", "\<\"Boiled Egg\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Boiled Egg\"\>", ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Car\"\>", ",", "\<\"Boiled Egg\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Boiled Egg\"\>", ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Boiled Egg\"\>", 
+     ",", "\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Boiled Egg\"\>", 
+     ",", "\<\"Peanut Butter\"\>", ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Boiled Egg\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Peanut Butter\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Boiled Egg\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Fake Nails\"\>", ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Boiled Egg\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Car\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Boiled Egg\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Fake Nails\"\>", ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Boiled Egg\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Boiled Egg\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Peanut Butter\"\>", ",", "\<\"Car\"\>"}], "}"}]}], 
+  "}"}]], "Output",
+ CellChangeTimes->{3.659642769084096*^9, 3.659642970032597*^9}]
+}, Open  ]],
+
+Cell["\<\
+Of course there are many more initial states now for Monty to start with.\
+\>", "Text",
+ CellChangeTimes->{{3.659642781346109*^9, 3.65964280514946*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"startingStates4", " ", "=", " ", 
+   RowBox[{"RandomChoice", "[", 
+    RowBox[{"initialStates4", ",", " ", "numGames"}], "]"}]}], ";"}]], "Input",\
+
+ CellChangeTimes->{{3.659545841604702*^9, 3.659545929654562*^9}, {
+  3.659545973596333*^9, 3.659545975658546*^9}, {3.659546090463059*^9, 
+  3.659546095773428*^9}, {3.65954640145474*^9, 3.65954640278996*^9}, {
+  3.6596428824212723`*^9, 3.6596428878486423`*^9}}],
+
+Cell["Here are some starting states", "Text",
+ CellChangeTimes->{{3.659642895871112*^9, 3.659642905640504*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"startingStates4", "[", 
+  RowBox[{"[", 
+   RowBox[{"100", ";;", "110"}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.659642912028652*^9, 3.659642942221758*^9}, {
+  3.6596430054575768`*^9, 3.659643008646193*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Boiled Egg\"\>", 
+     ",", "\<\"Peanut Butter\"\>", ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Boiled Egg\"\>", ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Boiled Egg\"\>", 
+     ",", "\<\"Car\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>", 
+     ",", "\<\"Boiled Egg\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Fake Nails\"\>", ",", "\<\"Boiled Egg\"\>", 
+     ",", "\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Boiled Egg\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Peanut Butter\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Car\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Boiled Egg\"\>", ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Boiled Egg\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Peanut Butter\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Fake Nails\"\>", ",", "\<\"Boiled Egg\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Boiled Egg\"\>", ",", "\<\"Car\"\>", 
+     ",", "\<\"Fake Nails\"\>", ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Peanut Butter\"\>", ",", "\<\"Fake Nails\"\>", 
+     ",", "\<\"Car\"\>", ",", "\<\"Boiled Egg\"\>"}], "}"}]}], 
+  "}"}]], "Output",
+ CellChangeTimes->{
+  3.659642943113879*^9, {3.659642991836937*^9, 3.659643010000883*^9}}]
+}, Open  ]],
+
+Cell["\<\
+The playMontyHall function just needs to be changed a bit to accommodate 4 or \
+more prizes.\
+\>", "Text",
+ CellChangeTimes->{{3.6596430742607193`*^9, 3.65964310212738*^9}, 
+   3.689447445249447*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"playMontyHallExt", "[", "startingState_", "]"}], ":=", " ", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+      "contestantChoice", ",", " ", "montyOpens", ",", " ", "switchResult", 
+       ",", " ", "noSwitchResult"}], "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+      "startingState", " ", "is", " ", "any", " ", "of", " ", "the", " ", 
+       "startingStates4"}], " ", "*)"}], "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"contestantChoice", " ", "=", " ", 
+       RowBox[{"RandomChoice", "[", "startingState", "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"contestantChoice", " ", "\[NotEqual]", " ", "\"\<Car\>\""}], 
+        ",", " ", 
+        RowBox[{"montyOpens", " ", "=", " ", 
+         RowBox[{"RandomChoice", "[", 
+          RowBox[{"Select", "[", 
+           RowBox[{"startingState", ",", " ", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"#", " ", "\[NotEqual]", " ", "\"\<Car\>\""}], " ", "&&",
+               " ", 
+              RowBox[{"#", " ", "\[NotEqual]", " ", "contestantChoice"}]}], 
+             " ", "&"}]}], "]"}], "]"}]}], ",", " ", 
+        RowBox[{"montyOpens", " ", "=", " ", 
+         RowBox[{"RandomChoice", "[", 
+          RowBox[{"Complement", "[", 
+           RowBox[{"startingState", ",", " ", 
+            RowBox[{"{", "contestantChoice", "}"}]}], "]"}], "]"}]}]}], "]"}],
+       ";", "\[IndentingNewLine]", 
+      RowBox[{"switchResult", " ", "=", " ", 
+       RowBox[{"RandomChoice", "[", 
+        RowBox[{"Complement", "[", 
+         RowBox[{"startingState", ",", " ", 
+          RowBox[{"Union", "[", 
+           RowBox[{
+            RowBox[{"{", "contestantChoice", "}"}], ",", " ", 
+            RowBox[{"{", "montyOpens", "}"}]}], "]"}]}], "]"}], "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"noSwitchResult", " ", "=", " ", "contestantChoice"}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"\"\<Contestant's Choice\>\"", ",", "contestantChoice"}], 
+         "}"}], ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Monty Opens\>\"", ",", " ", "montyOpens"}], "}"}], ",", 
+        " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Prize for Switching\>\"", ",", "switchResult"}], "}"}], 
+        ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Prize for Not Switching\>\"", ",", "noSwitchResult"}], 
+         "}"}]}], "}"}]}]}], "\[IndentingNewLine]", "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6595674189772377`*^9, 3.659567554284238*^9}, {
+  3.659643118571569*^9, 3.65964323257681*^9}, {3.659643272485856*^9, 
+  3.659643278129673*^9}}],
+
+Cell["Take it for a spin...", "Text",
+ CellChangeTimes->{{3.659643293418783*^9, 3.659643304887697*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"playMontyHallExt", "[", 
+  RowBox[{"startingStates4", "[", 
+   RowBox[{"[", "4", "]"}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.6596433092403812`*^9, 3.659643327464313*^9}, {
+  3.659643360350218*^9, 3.6596433799161367`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Contestant's Choice\"\>", ",", "\<\"Peanut Butter\"\>"}], 
+    "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Monty Opens\"\>", ",", "\<\"Boiled Egg\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Prize for Switching\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}],
+    ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Prize for Not Switching\"\>", ",", "\<\"Peanut Butter\"\>"}],
+     "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.659643328485652*^9, {3.6596433616415977`*^9, 3.6596433806678762`*^9}}]
+}, Open  ]],
+
+Cell["Play the game a whole bunch of times ", "Text",
+ CellChangeTimes->{{3.659643425577739*^9, 3.659643432453082*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"resultsExt4", " ", "=", " ", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"playMontyHallExt", "[", "#", "]"}], " ", "&"}], "/@", " ", 
+    "startingStates4"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6595560605436497`*^9, 3.6595561079919367`*^9}, {
+   3.6595658680449457`*^9, 3.6595658781330633`*^9}, {3.659643438996772*^9, 
+   3.6596434486322813`*^9}, 3.6596442510225697`*^9}],
+
+Cell["\<\
+See what the success rates are for switching versus not switching\
+\>", "Text",
+ CellChangeTimes->{{3.659643530207972*^9, 3.659643542945112*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"successRateMontyHall", "[", "resultsExt4", "]"}]], "Input",
+ CellChangeTimes->{{3.6595560605436497`*^9, 3.6595561079919367`*^9}, {
+   3.6595658680449457`*^9, 3.6595658781330633`*^9}, {3.659643550400148*^9, 
+   3.65964355750035*^9}, 3.65964426016745*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Success Rate for Switching\"\>", ",", "0.37426`"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Success Rate for NOT Switching\"\>", ",", "0.2526`"}], 
+    "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.659643558759759*^9, 3.659644261796321*^9}]
+}, Open  ]],
+
+Cell["\<\
+Switching still has its benefit but the relative difference between switching \
+versus not switching is much lower - it dropped from about 3x to about 1.5x. \
+So the information contained in Monty\[CloseCurlyQuote]s opening of a door is \
+much less compared to the 3-door game. That the efficacy of switching drops \
+off so suddenly when a door is added is surprising. \
+\>", "Text",
+ CellChangeTimes->{{3.659643631599388*^9, 3.6596436734109793`*^9}, {
+  3.659643705176255*^9, 3.6596437113263283`*^9}, {3.659643746989851*^9, 
+  3.659643811577133*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Exercise 3", "Section",
+ CellChangeTimes->{{3.659643999436678*^9, 3.659644001690353*^9}}],
+
+Cell[TextData[{
+ "The natural next question is to see what happens when there are 5 doors -- \
+or more generally, how many doors will it take for the switching strategy to \
+have no relative advantage over the non-switching strategy? And is there some \
+number of doors for which the efficacy of the switching become ",
+ StyleBox["worse",
+  FontSlant->"Italic"],
+ " than not switching? "
+}], "Text",
+ CellChangeTimes->{{3.659643720418738*^9, 3.659643742207686*^9}, {
+  3.659643816946001*^9, 3.6596439726107817`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"prizes5", "=", " ", 
+  RowBox[{"{", 
+   RowBox[{
+   "\"\<Car\>\"", ",", " ", "\"\<Peanut Butter\>\"", ",", " ", 
+    "\"\<Fake Nails\>\"", ",", " ", "\"\<Boiled Egg\>\"", ",", " ", 
+    "\"\<Carrot\>\""}], "}"}]}]], "Input",
+ CellChangeTimes->{{3.659552645354158*^9, 3.6595526628218822`*^9}, {
+   3.6596426799794617`*^9, 3.659642726732853*^9}, 3.659642764059269*^9, {
+   3.6596429648797483`*^9, 3.6596429650371733`*^9}, {3.6596440345848837`*^9, 
+   3.659644040644561*^9}, {3.659644104437516*^9, 3.659644106332749*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>", 
+   ",", "\<\"Fake Nails\"\>", ",", "\<\"Boiled Egg\"\>", 
+   ",", "\<\"Carrot\"\>"}], "}"}]], "Output",
+ CellChangeTimes->{3.659644114173942*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"initialStates5", " ", "=", " ", 
+   RowBox[{"Permutations", "[", "prizes5", "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.659545598409096*^9, 3.659545621234236*^9}, {
+  3.659545661135202*^9, 3.659545673923024*^9}, {3.6595526718597193`*^9, 
+  3.659552673402137*^9}, {3.659642757733407*^9, 3.6596427613644238`*^9}, {
+  3.659644165738893*^9, 3.659644194747657*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"startingStates5", " ", "=", " ", 
+   RowBox[{"RandomChoice", "[", 
+    RowBox[{"initialStates5", ",", " ", "numGames"}], "]"}]}], ";"}]], "Input",\
+
+ CellChangeTimes->{{3.659545841604702*^9, 3.659545929654562*^9}, {
+  3.659545973596333*^9, 3.659545975658546*^9}, {3.659546090463059*^9, 
+  3.659546095773428*^9}, {3.65954640145474*^9, 3.65954640278996*^9}, {
+  3.6596428824212723`*^9, 3.6596428878486423`*^9}, {3.659644136050844*^9, 
+  3.659644140865273*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"playMontyHallExt", "[", 
+  RowBox[{"startingStates5", "[", 
+   RowBox[{"[", "4", "]"}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.6596433092403812`*^9, 3.659643327464313*^9}, {
+  3.659643360350218*^9, 3.6596433799161367`*^9}, {3.6596442220015793`*^9, 
+  3.659644222567313*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Contestant's Choice\"\>", ",", "\<\"Fake Nails\"\>"}], "}"}],
+    ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Monty Opens\"\>", ",", "\<\"Carrot\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Prize for Switching\"\>", ",", "\<\"Boiled Egg\"\>"}], "}"}],
+    ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Prize for Not Switching\"\>", ",", "\<\"Fake Nails\"\>"}], 
+    "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.6596442241112833`*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"startingStates5", " ", "=", " ", 
+   RowBox[{"RandomChoice", "[", 
+    RowBox[{"initialStates5", ",", " ", "numGames"}], "]"}]}], ";"}]], "Input",\
+
+ CellChangeTimes->{{3.659545841604702*^9, 3.659545929654562*^9}, {
+  3.659545973596333*^9, 3.659545975658546*^9}, {3.659546090463059*^9, 
+  3.659546095773428*^9}, {3.65954640145474*^9, 3.65954640278996*^9}, {
+  3.6596428824212723`*^9, 3.6596428878486423`*^9}, {3.6596443064296*^9, 
+  3.659644311129361*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"resultsExt5", " ", "=", " ", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"playMontyHallExt", "[", "#", "]"}], " ", "&"}], "/@", " ", 
+    "startingStates5"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6595560605436497`*^9, 3.6595561079919367`*^9}, {
+   3.6595658680449457`*^9, 3.6595658781330633`*^9}, {3.659643438996772*^9, 
+   3.6596434486322813`*^9}, 3.6596442510225697`*^9, {3.659644357633375*^9, 
+   3.6596443645756483`*^9}}],
+
+Cell["\<\
+See what the success rates are for switching versus not switching when there \
+are 5 prizes\
+\>", "Text",
+ CellChangeTimes->{{3.659643530207972*^9, 3.659643542945112*^9}, {
+  3.659644378834673*^9, 3.659644383103294*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"successRateMontyHall", "[", "resultsExt5", "]"}]], "Input",
+ CellChangeTimes->{{3.6595560605436497`*^9, 3.6595561079919367`*^9}, {
+   3.6595658680449457`*^9, 3.6595658781330633`*^9}, {3.659643550400148*^9, 
+   3.65964355750035*^9}, 3.65964426016745*^9, {3.659644375276366*^9, 
+   3.6596443760339613`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Success Rate for Switching\"\>", ",", "0.26802`"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Success Rate for NOT Switching\"\>", ",", "0.1983`"}], 
+    "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.659644386701013*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{".26802", "/", ".1983"}]], "Input",
+ CellChangeTimes->{{3.659644412030373*^9, 3.65964442643931*^9}}],
+
+Cell[BoxData["1.3515885022692888`"], "Output",
+ CellChangeTimes->{3.659644427561612*^9}]
+}, Open  ]],
+
+Cell["\<\
+The success rate for switching is still higher, but the relative difference \
+between switching and not switching is down to 1.35x. 
+We can guess that this relative advantage keeps dropping as more doors are \
+added to the game.\
+\>", "Text",
+ CellChangeTimes->{{3.659644432594303*^9, 3.6596445174671173`*^9}}],
+
+Cell["Let\[CloseCurlyQuote]s try it for 8 doors to check our intuition.", \
+"Text",
+ CellChangeTimes->{{3.659644527188963*^9, 3.6596445622988453`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"prizes8", "=", " ", 
+  RowBox[{"{", 
+   RowBox[{
+   "\"\<Car\>\"", ",", " ", "\"\<Peanut Butter\>\"", ",", " ", 
+    "\"\<Fake Nails\>\"", ",", " ", "\"\<Boiled Egg\>\"", ",", " ", 
+    "\"\<Carrot\>\"", ",", " ", "\"\<Lemon\>\"", ",", " ", "\"\<Pencil\>\"", 
+    ",", " ", "\"\<Stick of Gum\>\""}], "}"}]}]], "Input",
+ CellChangeTimes->{{3.659552645354158*^9, 3.6595526628218822`*^9}, {
+   3.6596426799794617`*^9, 3.659642726732853*^9}, 3.659642764059269*^9, {
+   3.6596429648797483`*^9, 3.6596429650371733`*^9}, {3.6596440345848837`*^9, 
+   3.659644040644561*^9}, {3.659644104437516*^9, 3.659644106332749*^9}, {
+   3.6596445962437677`*^9, 3.659644632117648*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"Car\"\>", ",", "\<\"Peanut Butter\"\>", 
+   ",", "\<\"Fake Nails\"\>", ",", "\<\"Boiled Egg\"\>", 
+   ",", "\<\"Carrot\"\>", ",", "\<\"Lemon\"\>", ",", "\<\"Pencil\"\>", 
+   ",", "\<\"Stick of Gum\"\>"}], "}"}]], "Output",
+ CellChangeTimes->{3.659644114173942*^9, 3.659644635117014*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"initialStates8", " ", "=", " ", 
+   RowBox[{"Permutations", "[", "prizes8", "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.659545598409096*^9, 3.659545621234236*^9}, {
+  3.659545661135202*^9, 3.659545673923024*^9}, {3.6595526718597193`*^9, 
+  3.659552673402137*^9}, {3.659642757733407*^9, 3.6596427613644238`*^9}, {
+  3.659644165738893*^9, 3.659644194747657*^9}, {3.659644639284354*^9, 
+  3.659644645370566*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"startingStates8", " ", "=", " ", 
+   RowBox[{"RandomChoice", "[", 
+    RowBox[{"initialStates8", ",", " ", "numGames"}], "]"}]}], ";"}]], "Input",\
+
+ CellChangeTimes->{{3.659545841604702*^9, 3.659545929654562*^9}, {
+  3.659545973596333*^9, 3.659545975658546*^9}, {3.659546090463059*^9, 
+  3.659546095773428*^9}, {3.65954640145474*^9, 3.65954640278996*^9}, {
+  3.6596428824212723`*^9, 3.6596428878486423`*^9}, {3.659644136050844*^9, 
+  3.659644140865273*^9}, {3.659644651427389*^9, 3.6596446575680857`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"playMontyHallExt", "[", 
+  RowBox[{"startingStates8", "[", 
+   RowBox[{"[", "4", "]"}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.6596433092403812`*^9, 3.659643327464313*^9}, {
+  3.659643360350218*^9, 3.6596433799161367`*^9}, {3.6596442220015793`*^9, 
+  3.659644222567313*^9}, {3.659644670943964*^9, 3.659644671413574*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Contestant's Choice\"\>", ",", "\<\"Pencil\"\>"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Monty Opens\"\>", ",", "\<\"Peanut Butter\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Prize for Switching\"\>", ",", "\<\"Car\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Prize for Not Switching\"\>", ",", "\<\"Pencil\"\>"}], 
+    "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.6596442241112833`*^9, 3.659644672957591*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"resultsExt8", " ", "=", " ", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"playMontyHallExt", "[", "#", "]"}], " ", "&"}], "/@", " ", 
+    "startingStates8"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6595560605436497`*^9, 3.6595561079919367`*^9}, {
+   3.6595658680449457`*^9, 3.6595658781330633`*^9}, {3.659643438996772*^9, 
+   3.6596434486322813`*^9}, 3.6596442510225697`*^9, {3.659644357633375*^9, 
+   3.6596443645756483`*^9}, {3.65964473969407*^9, 3.6596447461550617`*^9}}],
+
+Cell["\<\
+See what the success rates are for switching versus not switching when there \
+are 5 prizes\
+\>", "Text",
+ CellChangeTimes->{{3.659643530207972*^9, 3.659643542945112*^9}, {
+  3.659644378834673*^9, 3.659644383103294*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"successRateMontyHall", "[", "resultsExt8", "]"}]], "Input",
+ CellChangeTimes->{{3.6595560605436497`*^9, 3.6595561079919367`*^9}, {
+   3.6595658680449457`*^9, 3.6595658781330633`*^9}, {3.659643550400148*^9, 
+   3.65964355750035*^9}, 3.65964426016745*^9, {3.659644375276366*^9, 
+   3.6596443760339613`*^9}, {3.659644758638689*^9, 3.659644759060811*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"Success Rate for Switching\"\>", ",", "0.14552`"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"Success Rate for NOT Switching\"\>", ",", "0.12501`"}], 
+    "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.6596447602754393`*^9}]
+}, Open  ]],
+
+Cell["\<\
+Yes, our guess seems to be right -- when there are 8 doors, switching is not \
+that much better than switching. Well, that\[CloseCurlyQuote]s because the \
+amount of information that Monty is giving us by opening a no-prize door gets \
+lower and lower as the number of doors increase. \
+\>", "Text",
+ CellChangeTimes->{{3.659644772283701*^9, 3.6596448383170977`*^9}, {
+  3.6641012744531727`*^9, 3.664101342471681*^9}}]
+}, Open  ]]
+},
+WindowSize->{853, 691},
+WindowMargins->{{Automatic, 88}, {Automatic, 11}},
+FrontEndVersion->"11.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (July 28, \
+2016)",
+StyleDefinitions->"JSNotepad.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 107, 1, 72, "Section"],
+Cell[690, 25, 491, 9, 114, "Text"],
+Cell[CellGroupData[{
+Cell[1206, 38, 195, 4, 50, "Item"],
+Cell[1404, 44, 205, 4, 26, "Item"],
+Cell[1612, 50, 370, 6, 74, "Item"],
+Cell[1985, 58, 327, 6, 50, "Item"]
+}, Open  ]],
+Cell[2327, 67, 359, 7, 32, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2723, 79, 120, 1, 72, "Section"],
+Cell[2846, 82, 277, 7, 31, "Input"],
+Cell[3126, 91, 295, 5, 56, "Text"],
+Cell[CellGroupData[{
+Cell[3446, 100, 281, 5, 31, "Input"],
+Cell[3730, 107, 876, 22, 51, "Output"]
+}, Open  ]],
+Cell[4621, 132, 611, 9, 104, "Text"],
+Cell[5235, 143, 255, 5, 31, "Input"],
+Cell[5493, 150, 389, 8, 31, "Input"],
+Cell[5885, 160, 231, 4, 56, "Text"],
+Cell[CellGroupData[{
+Cell[6141, 168, 228, 4, 31, "Input"],
+Cell[6372, 174, 1391, 35, 89, "Output"]
+}, Open  ]],
+Cell[7778, 212, 207, 4, 56, "Text"],
+Cell[7988, 218, 287, 5, 56, "Text"],
+Cell[CellGroupData[{
+Cell[8300, 227, 313, 8, 31, "Input"],
+Cell[8616, 237, 152, 3, 31, "Output"]
+}, Open  ]],
+Cell[8783, 243, 325, 6, 56, "Text"],
+Cell[9111, 251, 181, 2, 32, "Text"],
+Cell[CellGroupData[{
+Cell[9317, 257, 359, 9, 31, "Input"],
+Cell[9679, 268, 79, 1, 31, "Output"]
+}, Open  ]],
+Cell[9773, 272, 135, 1, 32, "Text"],
+Cell[CellGroupData[{
+Cell[9933, 277, 405, 10, 31, "Input"],
+Cell[10341, 289, 79, 1, 31, "Output"]
+}, Open  ]],
+Cell[10435, 293, 617, 10, 138, "Text"],
+Cell[CellGroupData[{
+Cell[11077, 307, 472, 10, 51, "Input"],
+Cell[11552, 319, 251, 6, 31, "Output"]
+}, Open  ]],
+Cell[11818, 328, 292, 6, 56, "Text"],
+Cell[CellGroupData[{
+Cell[12135, 338, 235, 4, 31, "Input"],
+Cell[12373, 344, 180, 2, 31, "Output"]
+}, Open  ]],
+Cell[12568, 349, 865, 15, 230, "Text"],
+Cell[CellGroupData[{
+Cell[13458, 368, 905, 21, 51, "Input"],
+Cell[14366, 391, 167, 3, 31, "Output"]
+}, Open  ]],
+Cell[14548, 397, 435, 7, 56, "Text"],
+Cell[CellGroupData[{
+Cell[15008, 408, 440, 10, 31, "Input"],
+Cell[15451, 420, 111, 1, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[15599, 426, 152, 2, 31, "Input"],
+Cell[15754, 430, 80, 1, 31, "Output"]
+}, Open  ]],
+Cell[15849, 434, 294, 6, 56, "Text"],
+Cell[16146, 442, 3115, 68, 203, "Input"],
+Cell[19264, 512, 118, 1, 32, "Text"],
+Cell[CellGroupData[{
+Cell[19407, 517, 446, 8, 31, "Input"],
+Cell[19856, 527, 947, 20, 51, "Output"]
+}, Open  ]],
+Cell[20818, 550, 219, 4, 56, "Text"],
+Cell[21040, 556, 269, 7, 31, "Input"],
+Cell[21312, 565, 157, 3, 32, "Text"],
+Cell[CellGroupData[{
+Cell[21494, 572, 556, 15, 31, "Input"],
+Cell[22053, 589, 101, 1, 31, "Output"]
+}, Open  ]],
+Cell[22169, 593, 165, 3, 32, "Text"],
+Cell[CellGroupData[{
+Cell[22359, 600, 513, 14, 31, "Input"],
+Cell[22875, 616, 77, 1, 31, "Output"]
+}, Open  ]],
+Cell[22967, 620, 260, 5, 56, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[23264, 630, 95, 1, 72, "Section"],
+Cell[23362, 633, 561, 10, 230, "Text"],
+Cell[23926, 645, 283, 6, 32, "Text"],
+Cell[24212, 653, 141, 1, 32, "Text"],
+Cell[24356, 656, 3415, 80, 279, "Input"],
+Cell[27774, 738, 110, 1, 32, "Text"],
+Cell[27887, 741, 324, 8, 31, "Input"],
+Cell[28214, 751, 131, 1, 32, "Text"],
+Cell[CellGroupData[{
+Cell[28370, 756, 509, 14, 31, "Input"],
+Cell[28882, 772, 126, 2, 31, "Output"]
+}, Open  ]],
+Cell[29023, 777, 131, 1, 32, "Text"],
+Cell[CellGroupData[{
+Cell[29179, 782, 566, 15, 31, "Input"],
+Cell[29748, 799, 128, 2, 31, "Output"]
+}, Open  ]],
+Cell[29891, 804, 2153, 54, 146, "Input"],
+Cell[CellGroupData[{
+Cell[32069, 862, 144, 2, 31, "Input"],
+Cell[32216, 866, 308, 9, 31, "Output"]
+}, Open  ]],
+Cell[32539, 878, 1089, 17, 244, "Text"],
+Cell[33631, 897, 393, 7, 56, "Text"],
+Cell[34027, 906, 3117, 73, 260, "Input"],
+Cell[CellGroupData[{
+Cell[37169, 983, 307, 8, 31, "Input"],
+Cell[37479, 993, 496, 13, 51, "Output"]
+}, Open  ]],
+Cell[37990, 1009, 535, 12, 31, "Input"],
+Cell[CellGroupData[{
+Cell[38550, 1025, 146, 2, 31, "Input"],
+Cell[38699, 1029, 399, 10, 31, "Output"]
+}, Open  ]],
+Cell[39113, 1042, 343, 6, 80, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[39493, 1053, 97, 1, 72, "Section"],
+Cell[39593, 1056, 176, 4, 32, "Text"],
+Cell[39772, 1062, 213, 4, 32, "Text"],
+Cell[CellGroupData[{
+Cell[40010, 1070, 418, 9, 31, "Input"],
+Cell[40431, 1081, 227, 4, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[40695, 1090, 331, 5, 31, "Input"],
+Cell[41029, 1097, 3696, 76, 241, "Output"]
+}, Open  ]],
+Cell[44740, 1176, 162, 3, 32, "Text"],
+Cell[44905, 1181, 444, 9, 31, "Input"],
+Cell[45352, 1192, 111, 1, 32, "Text"],
+Cell[CellGroupData[{
+Cell[45488, 1197, 237, 5, 31, "Input"],
+Cell[45728, 1204, 1786, 38, 127, "Output"]
+}, Open  ]],
+Cell[47529, 1245, 209, 5, 32, "Text"],
+Cell[47741, 1252, 2772, 65, 241, "Input"],
+Cell[50516, 1319, 103, 1, 32, "Text"],
+Cell[CellGroupData[{
+Cell[50644, 1324, 254, 5, 31, "Input"],
+Cell[50901, 1331, 572, 15, 51, "Output"]
+}, Open  ]],
+Cell[51488, 1349, 119, 1, 32, "Text"],
+Cell[51610, 1352, 407, 9, 31, "Input"],
+Cell[52020, 1363, 155, 3, 32, "Text"],
+Cell[CellGroupData[{
+Cell[52200, 1370, 277, 4, 31, "Input"],
+Cell[52480, 1376, 327, 9, 31, "Output"]
+}, Open  ]],
+Cell[52822, 1388, 561, 9, 104, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[53420, 1402, 95, 1, 72, "Section"],
+Cell[53518, 1405, 516, 10, 104, "Text"],
+Cell[CellGroupData[{
+Cell[54059, 1419, 542, 10, 31, "Input"],
+Cell[54604, 1431, 230, 5, 31, "Output"]
+}, Open  ]],
+Cell[54849, 1439, 399, 7, 31, "Input"],
+Cell[55251, 1448, 493, 10, 31, "Input"],
+Cell[CellGroupData[{
+Cell[55769, 1462, 305, 6, 31, "Input"],
+Cell[56077, 1470, 510, 14, 51, "Output"]
+}, Open  ]],
+Cell[56602, 1487, 491, 10, 31, "Input"],
+Cell[57096, 1499, 459, 10, 31, "Input"],
+Cell[57558, 1511, 230, 5, 32, "Text"],
+Cell[CellGroupData[{
+Cell[57813, 1520, 329, 5, 31, "Input"],
+Cell[58145, 1527, 305, 9, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[58487, 1541, 123, 2, 31, "Input"],
+Cell[58613, 1545, 88, 1, 31, "Output"]
+}, Open  ]],
+Cell[58716, 1549, 320, 6, 114, "Text"],
+Cell[59039, 1557, 151, 2, 32, "Text"],
+Cell[CellGroupData[{
+Cell[59215, 1563, 688, 12, 51, "Input"],
+Cell[59906, 1577, 330, 6, 31, "Output"]
+}, Open  ]],
+Cell[60251, 1586, 448, 8, 31, "Input"],
+Cell[60702, 1596, 541, 10, 31, "Input"],
+Cell[CellGroupData[{
+Cell[61268, 1610, 351, 6, 31, "Input"],
+Cell[61622, 1618, 520, 13, 51, "Output"]
+}, Open  ]],
+Cell[62157, 1634, 506, 10, 31, "Input"],
+Cell[62666, 1646, 230, 5, 32, "Text"],
+Cell[CellGroupData[{
+Cell[62921, 1655, 375, 5, 31, "Input"],
+Cell[63299, 1662, 308, 9, 31, "Output"]
+}, Open  ]],
+Cell[63622, 1674, 428, 7, 80, "Text"]
+}, Open  ]]
+}
+]
+*)
+

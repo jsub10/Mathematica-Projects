@@ -1,0 +1,9 @@
+# Files and folders to ignore
+*.png
+*.cdf
+*.tex
+*.eps
+*.html
+
+HTMLFiles/
+HTMLLinks/

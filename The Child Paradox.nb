@@ -1,0 +1,355 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     11388,        346]
+NotebookOptionsPosition[      9632,        283]
+NotebookOutlinePosition[      9988,        299]
+CellTagsIndexPosition[      9945,        296]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell["The Child Paradox (Good Simulation Exercises)", "Section",
+ CellChangeTimes->{{3.6598110752306557`*^9, 3.659811148296947*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Assumption", "Section",
+ CellChangeTimes->{{3.6598114453806763`*^9, 3.659811447482727*^9}}],
+
+Cell["\<\
+Overall Assumption: The probability of a newborn being a boy = 0.5, which is \
+also the probability of a newborn being a girl.\
+\>", "Text",
+ CellChangeTimes->{{3.659811111446847*^9, 3.659811117602272*^9}, {
+  3.65981115319263*^9, 3.659811213182171*^9}, {3.659811311453206*^9, 
+  3.659811417885934*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Question 1", "Section",
+ CellChangeTimes->{{3.659811421844101*^9, 3.659811424515624*^9}}],
+
+Cell["\<\
+Question 1: A mother has two children. The younger one is a daughter called \
+Mary. What is the probability that the other child is a girl?\
+\>", "Text"],
+
+Cell["\<\
+Well, simulate. Every mother with two children has picked them out of an urn \
+with replacement :-). So let\[CloseCurlyQuote]s simulate a whole bunch of \
+such pairs of children. Of course not everyone has 2 children -- some have \
+more, some have fewer. But we\[CloseCurlyQuote]ve already been told that the \
+mother in question has exactly two children. So this reduces our universe to \
+all mothers with 2 children.\
+\>", "Text",
+ CellChangeTimes->{{3.659811459929325*^9, 3.659811667817835*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"siblingPairs", " ", "=", " ", 
+   RowBox[{"RandomChoice", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\"\<Boy\>\"", ",", "\"\<Girl\>\""}], "}"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"100000", ",", "2"}], "}"}]}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6598117226390877`*^9, 3.6598117279732513`*^9}, {
+  3.659811763966096*^9, 3.659811844144558*^9}, {3.659812624807558*^9, 
+  3.659812627091402*^9}}],
+
+Cell["The sibling pairs look like this...", "Text",
+ CellChangeTimes->{{3.659811849773163*^9, 3.6598118628868628`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"siblingPairs", " ", "//", " ", "Short"}]], "Input",
+ CellChangeTimes->{{3.659811866136997*^9, 3.6598118752301207`*^9}, {
+  3.659811913077993*^9, 3.6598119282421722`*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"\<\"Girl\"\>", ",", "\<\"Boy\"\>"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"\<\"Girl\"\>", ",", "\<\"Girl\"\>"}], "}"}], ",", 
+    RowBox[{"\[LeftSkeleton]", "99996", "\[RightSkeleton]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"\<\"Girl\"\>", ",", "\<\"Girl\"\>"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"\<\"Boy\"\>", ",", "\<\"Girl\"\>"}], "}"}]}], "}"}],
+  Short]], "Output",
+ CellChangeTimes->{
+  3.6598118759450817`*^9, {3.6598119165649443`*^9, 3.659811929540229*^9}, 
+   3.659812635272984*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "with the <<integer>> in the middle standing for the 995 other pairs in the \
+middle of the sequence that are not shown.\nNow the question specifies that \
+the ",
+ StyleBox["younger",
+  FontSlant->"Italic"],
+ " child is a girl. So let\[CloseCurlyQuote]s isolate all the instances where \
+the second child is a girl. "
+}], "Text",
+ CellChangeTimes->{{3.65981188066894*^9, 3.659811893525312*^9}, {
+  3.6598119473787003`*^9, 3.65981202021174*^9}, {3.659812113689356*^9, 
+  3.659812169163973*^9}, {3.659812643754558*^9, 3.659812656353758*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"secondChildGirl", " ", "=", " ", 
+   RowBox[{"Cases", "[", 
+    RowBox[{"siblingPairs", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"_", ",", " ", "\"\<Girl\>\""}], "}"}]}], "]"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.659812176568314*^9, 3.659812274335679*^9}}],
+
+Cell["\<\
+Of these instances, isolate the cases where the other (i.e. older or first \
+child) is also a girl. \
+\>", "Text",
+ CellChangeTimes->{{3.6598122834765253`*^9, 3.659812329684753*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"firstChildGirlWhenSecondIsGirl", " ", "=", " ", 
+   RowBox[{"Cases", "[", 
+    RowBox[{"secondChildGirl", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<Girl\>\"", ",", " ", "_"}], "}"}]}], "]"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.659812334857717*^9, 3.659812436299181*^9}}],
+
+Cell["\<\
+The answer to the question is just the frequency of \
+firstChildGirlWhenSecondIsGirl divided by the frequency of secondChildGirl. \
+\>", "Text",
+ CellChangeTimes->{{3.659812438909814*^9, 3.6598124900524406`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"answer1", " ", "=", " ", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"Length", "[", "firstChildGirlWhenSecondIsGirl", "]"}], "/", 
+    RowBox[{"Length", "[", "secondChildGirl", "]"}]}], " ", "//", 
+   "N"}]}]], "Input",
+ CellChangeTimes->{{3.659812498688558*^9, 3.65981252950546*^9}}],
+
+Cell[BoxData["0.5045333546824651`"], "Output",
+ CellChangeTimes->{3.6598125309673347`*^9, 3.659812674438219*^9}]
+}, Open  ]],
+
+Cell["O.K. that looks close to 0.5. ", "Text",
+ CellChangeTimes->{{3.6598126779380503`*^9, 3.6598126906242*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Question 2", "Section",
+ CellChangeTimes->{{3.659812728568708*^9, 3.6598127305746527`*^9}}],
+
+Cell["\<\
+Question 2: A mother has two children. The older one is a daughter named \
+Mary. What is the probability that the other child is a girl?\
+\>", "Text",
+ CellChangeTimes->{{3.659812737800992*^9, 3.659812739870717*^9}}],
+
+Cell["\<\
+As far as we know, there\[CloseCurlyQuote]s nothing special about the older \
+or younger sibling, at least from the mathematical standpoint of the \
+probability of their gender! At the risk of displeasing the paradoxical gods \
+of probability, we say the answer to question 1 is the same as the answer to \
+question 1 -- roughly 0.5. For practice, go ahead and check it just to be \
+sure.\
+\>", "Text",
+ CellChangeTimes->{{3.659812753653409*^9, 3.659812839431188*^9}, {
+  3.65981308280297*^9, 3.6598131498327837`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Question 3", "Section",
+ CellChangeTimes->{{3.6598131627539577`*^9, 3.6598131646958427`*^9}}],
+
+Cell["\<\
+Question 3: A mother has two children. One of them is a daughter. What is the \
+probability that the other child is a girl?\
+\>", "Text",
+ CellChangeTimes->{{3.6598132565752773`*^9, 3.6598132614688663`*^9}}],
+
+Cell["\<\
+This is subtly different from the other questions -- it seems to leave things \
+more open because it doesn\[CloseCurlyQuote]t specify if the daughter is \
+older or younger. Is it really a different question? Let\[CloseCurlyQuote]s \
+see.\
+\>", "Text",
+ CellChangeTimes->{{3.659813276540592*^9, 3.65981335678001*^9}, {
+  3.659813407672934*^9, 3.659813409264736*^9}}],
+
+Cell["\<\
+We\[CloseCurlyQuote]ll start by taking all sibling pairs from siblingPairs \
+where at least one of the children is a girl. This will give us the \
+\[OpenCurlyDoubleQuote]denominator\[CloseCurlyDoubleQuote] for our \
+probability calculation.\
+\>", "Text",
+ CellChangeTimes->{{3.659813359499816*^9, 3.659813452182928*^9}, {
+  3.65981387455838*^9, 3.659813885717691*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"atLeast1Girl", " ", "=", " ", 
+   RowBox[{"Cases", "[", 
+    RowBox[{"siblingPairs", ",", " ", 
+     RowBox[{"Except", "[", 
+      RowBox[{"{", 
+       RowBox[{"\"\<Boy\>\"", ",", " ", "\"\<Boy\>\""}], "}"}], "]"}]}], 
+    "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6598138929721823`*^9, 3.659813960738262*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"atLeast1Girl", " ", "//", " ", "Short"}]], "Input",
+ CellChangeTimes->{{3.659813967181381*^9, 3.659813976423307*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"\<\"Girl\"\>", ",", "\<\"Boy\"\>"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"\<\"Girl\"\>", ",", "\<\"Girl\"\>"}], "}"}], ",", 
+    RowBox[{"\[LeftSkeleton]", "74989", "\[RightSkeleton]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"\<\"Girl\"\>", ",", "\<\"Girl\"\>"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"\<\"Boy\"\>", ",", "\<\"Girl\"\>"}], "}"}]}], "}"}],
+  Short]], "Output",
+ CellChangeTimes->{3.6598139771939898`*^9}]
+}, Open  ]],
+
+Cell["Of this lot, how many are both girls? This would be:", "Text",
+ CellChangeTimes->{{3.659814001327447*^9, 3.659814023048256*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"bothGirls", " ", "=", " ", 
+   RowBox[{"Cases", "[", 
+    RowBox[{"atLeast1Girl", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<Girl\>\"", ",", " ", "\"\<Girl\>\""}], "}"}]}], "]"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.659814028649611*^9, 3.659814059499558*^9}}],
+
+Cell["So the answer is:", "Text",
+ CellChangeTimes->{{3.659814066687393*^9, 3.659814074962565*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"Length", "[", "bothGirls", "]"}], "/", 
+   RowBox[{"Length", "[", "atLeast1Girl", "]"}]}], " ", "//", "N"}]], "Input",\
+
+ CellChangeTimes->{{3.6598140785327673`*^9, 3.659814100025955*^9}}],
+
+Cell[BoxData["0.33613803955035804`"], "Output",
+ CellChangeTimes->{3.6598141011281233`*^9}]
+}, Open  ]],
+
+Cell["or about 0.33 or 33% or a 1/3rd.", "Text",
+ CellChangeTimes->{{3.659814112047698*^9, 3.659814137081564*^9}}]
+}, Open  ]]
+},
+WindowSize->{808, 755},
+WindowMargins->{{4, Automatic}, {Automatic, 4}},
+FrontEndVersion->"10.3 for Mac OS X x86 (32-bit, 64-bit Kernel) (October 9, \
+2015)",
+StyleDefinitions->"JSNotepad.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 132, 1, 96, "Section"],
+Cell[CellGroupData[{
+Cell[715, 25, 97, 1, 45, "Section"],
+Cell[815, 28, 313, 6, 50, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1165, 39, 95, 1, 65, "Section"],
+Cell[1263, 42, 163, 3, 50, "Text"],
+Cell[1429, 47, 508, 8, 113, "Text"],
+Cell[1940, 57, 458, 11, 29, "Input"],
+Cell[2401, 70, 119, 1, 29, "Text"],
+Cell[CellGroupData[{
+Cell[2545, 75, 194, 3, 29, "Input"],
+Cell[2742, 80, 593, 16, 29, "Output"]
+}, Open  ]],
+Cell[3350, 99, 556, 11, 102, "Text"],
+Cell[3909, 112, 303, 8, 29, "Input"],
+Cell[4215, 122, 192, 4, 50, "Text"],
+Cell[4410, 128, 321, 8, 29, "Input"],
+Cell[4734, 138, 222, 4, 50, "Text"],
+Cell[CellGroupData[{
+Cell[4981, 146, 300, 7, 29, "Input"],
+Cell[5284, 155, 112, 1, 28, "Output"]
+}, Open  ]],
+Cell[5411, 159, 112, 1, 29, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5560, 165, 97, 1, 65, "Section"],
+Cell[5660, 168, 226, 4, 50, "Text"],
+Cell[5889, 174, 528, 9, 113, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6454, 188, 99, 1, 65, "Section"],
+Cell[6556, 191, 217, 4, 50, "Text"],
+Cell[6776, 197, 375, 7, 71, "Text"],
+Cell[7154, 206, 378, 7, 71, "Text"],
+Cell[7535, 215, 351, 9, 29, "Input"],
+Cell[CellGroupData[{
+Cell[7911, 228, 141, 2, 28, "Input"],
+Cell[8055, 232, 516, 14, 29, "Output"]
+}, Open  ]],
+Cell[8586, 249, 134, 1, 29, "Text"],
+Cell[8723, 252, 308, 8, 28, "Input"],
+Cell[9034, 262, 99, 1, 29, "Text"],
+Cell[CellGroupData[{
+Cell[9158, 267, 235, 6, 29, "Input"],
+Cell[9396, 275, 91, 1, 28, "Output"]
+}, Open  ]],
+Cell[9502, 279, 114, 1, 29, "Text"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

@@ -1,0 +1,2638 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.4' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[    121991,       2630]
+NotebookOptionsPosition[    116001,       2425]
+NotebookOutlinePosition[    116354,       2441]
+CellTagsIndexPosition[    116311,       2438]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["The Problem", "Section",
+ CellChangeTimes->{{3.673548886045879*^9, 3.673548887580069*^9}}],
+
+Cell["\<\
+Brian Smith of KPMG came to me with a problem. He has a survey of about 20 \
+questions. Each question is a yes-no answer. Based on the entire string of \
+yes-no\[CloseCurlyQuote]s, the survey generates a customized output -- think \
+of it as text.
+
+Assume that each distinct pattern of yes-no\[CloseCurlyQuote]s produces a \
+distinct output. How can such a system be programmed efficiently? Obviously, \
+the brute force method won\[CloseCurlyQuote]t work -- it requires writing \
+2^20 if statements and another 2^20 pieces of distinct content. How then? 
+
+One idea is to set up a recursive grammar and then use the yes-no\
+\[CloseCurlyQuote]s as \
+\[OpenCurlyDoubleQuote]switches\[CloseCurlyDoubleQuote] to customize the \
+message. But how? Is this what a genetic algorithm is supposed to do? \
+\>", "Text",
+ CellChangeTimes->{{3.6730755987298117`*^9, 3.673075639461988*^9}, {
+  3.673075947491476*^9, 3.6730759756313133`*^9}, {3.6730761804912567`*^9, 
+  3.67307643450639*^9}}],
+
+Cell["\<\
+If we can generate the 2^20 different pieces of content (somehow), then the \
+if-then statements won\[CloseCurlyQuote]t be a problem. We can just tag each \
+custom output with an element of the 20-tuple. But event this assumes that \
+the customized outputs can somehow be generated programmatically.\
+\>", "Text",
+ CellChangeTimes->{{3.673530845017378*^9, 3.67353091450428*^9}, {
+  3.673531015358583*^9, 3.673531049941485*^9}, {3.6850208848450127`*^9, 
+  3.685020888166563*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"2", "^", "20"}]], "Input",
+ CellChangeTimes->{{3.673075356998548*^9, 3.673075360828252*^9}}],
+
+Cell[BoxData["1048576"], "Output",
+ CellChangeTimes->{3.673075361760199*^9, 3.673707427953741*^9, 
+  3.673716684243339*^9, 3.685021229227627*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"2", "^", "30"}]], "Input",
+ CellChangeTimes->{{3.673075368064171*^9, 3.6730753715620832`*^9}}],
+
+Cell[BoxData["1073741824"], "Output",
+ CellChangeTimes->{3.673075372384144*^9, 3.6737074280455503`*^9, 
+  3.673716684455645*^9, 3.685021229324957*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["The Approach", "Section",
+ CellChangeTimes->{{3.673548897051683*^9, 3.673548899859796*^9}}],
+
+Cell["\<\
+How then? One approach is to think of the content as a list of sentences. \
+Each sentence then has a few places where changes can be made. A marker bit \
+of 1 pushes it one way and a 0 pushes it another. \
+\>", "Text",
+ CellChangeTimes->{{3.6735310577095537`*^9, 3.673531122107479*^9}, {
+  3.6735312531041718`*^9, 3.673531273144085*^9}, {3.673533780832451*^9, 
+  3.67353379199794*^9}, {3.68502095095737*^9, 3.685020958021393*^9}}],
+
+Cell[BoxData[
+ RowBox[{"(*", " ", 
+  RowBox[{"Define", " ", "the", " ", "output", " ", "sentence"}], " ", 
+  "*)"}]], "Input",
+ CellChangeTimes->{{3.6735344602365522`*^9, 3.673534466380904*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"s1", " ", "=", " ", 
+  "\"\<The lazy brown fox jumped over the green hedge.\>\""}]], "Input",
+ CellChangeTimes->{{3.673534005067834*^9, 3.673534029007567*^9}}],
+
+Cell[BoxData["\<\"The lazy brown fox jumped over the green hedge.\"\>"], \
+"Output",
+ CellChangeTimes->{3.67353403267556*^9, 3.673707428094344*^9, 
+  3.673716684522395*^9, 3.685021229408156*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"(*", " ", 
+  RowBox[{
+  "Set", " ", "the", " ", "places", " ", "where", " ", "the", " ", "changes", 
+   " ", "are", " ", "to", " ", "be", " ", "made"}], " ", "*)"}]], "Input",
+ CellChangeTimes->{{3.673534470351153*^9, 3.673534485916156*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"s1Words", " ", "=", " ", 
+  RowBox[{"StringSplit", "[", "s1", "]"}]}]], "Input",
+ CellChangeTimes->{{3.6735368164038057`*^9, 3.673536825976138*^9}, {
+  3.67353686450432*^9, 3.673536899780183*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"The\"\>", ",", "\<\"lazy\"\>", ",", "\<\"brown\"\>", 
+   ",", "\<\"fox\"\>", ",", "\<\"jumped\"\>", ",", "\<\"over\"\>", 
+   ",", "\<\"the\"\>", ",", "\<\"green\"\>", ",", "\<\"hedge.\"\>"}], 
+  "}"}]], "Output",
+ CellChangeTimes->{
+  3.673536826657668*^9, {3.6735368662502403`*^9, 3.673536900751999*^9}, 
+   3.673707428144503*^9, 3.673716684604054*^9, 3.6850212294738617`*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"(*", " ", 
+  RowBox[{
+   RowBox[{"Set", " ", "up", " ", "the", " ", "20"}], "-", 
+   RowBox[{"bit", " ", "string"}]}], " ", "*)"}]], "Input",
+ CellChangeTimes->{{3.673536920378161*^9, 3.673536933531349*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"a1", " ", "=", " ", 
+  RowBox[{"RandomInteger", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"0", ",", "1"}], "}"}], ",", "20"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.673536945256609*^9, 3.673536986338006*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "0", ",", "0", ",", "0", ",", "1", ",", "0", ",", "1", ",", "0", ",", "0", 
+   ",", "0", ",", "0", ",", "1", ",", "0", ",", "1", ",", "1", ",", "1", ",", 
+   "1", ",", "1", ",", "1", ",", "1", ",", "0"}], "}"}]], "Output",
+ CellChangeTimes->{{3.673536964320547*^9, 3.67353698790304*^9}, 
+   3.6735408063669243`*^9, 3.673707428194888*^9, 3.673716684647497*^9, 
+   3.685021229557577*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{
+   "Set", " ", "up", " ", "the", " ", "phrases", " ", "that", " ", "respond", 
+    " ", "to", " ", "logic"}], " ", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{"s1Tags", " ", "=", " ", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", "1", "}"}], ",", " ", 
+      RowBox[{"{", 
+       RowBox[{"5", ",", "6"}], "}"}]}], "}"}]}], ";"}]}]], "Input",
+ CellChangeTimes->{{3.6735371977321453`*^9, 3.673537298049922*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{
+   "Set", " ", "up", " ", "the", " ", "relevant", " ", "code", " ", "that", 
+    " ", "affects", " ", "the", " ", "sentence"}], " ", "*)"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{"s1Code", " ", "=", " ", 
+   RowBox[{"Pick", "[", 
+    RowBox[{"a1", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{
+      "1", ",", "1", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", ",", 
+       "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", 
+       "0", ",", "0", ",", "1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+     "1"}], "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.673537547726296*^9, 3.6735375691168013`*^9}, {
+  3.673537611726297*^9, 3.6735376728766413`*^9}, {3.67354079281713*^9, 
+  3.673540798062607*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"0", ",", "0", ",", "0", ",", "1"}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.673537676162846*^9, {3.673540799554432*^9, 3.6735408135490026`*^9}, 
+   3.6737074282425833`*^9, 3.673716684697803*^9, 3.685021229625353*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"(*", " ", 
+  RowBox[{
+   RowBox[{"If", " ", "the", " ", "code", " ", "is", " ", "0"}], ",", " ", 
+   RowBox[{"use", " ", "the", " ", "first", " ", "item"}], ",", " ", 
+   RowBox[{"if", " ", "1"}], ",", " ", 
+   RowBox[{"use", " ", "the", " ", "second", " ", "item"}]}], " ", 
+  "*)"}]], "Input",
+ CellChangeTimes->{{3.673537487808941*^9, 3.673537507612159*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"s1Univ", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\"\<The\>\"", ",", " ", "\"\<A\>\""}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\"\<fox\>\"", ",", "\"\<sheep\>\""}], "}"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<jumped over\>\"", ",", " ", "\"\<ran across\>\""}], "}"}], 
+     ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<hedge.\>\"", ",", " ", "\"\<bush.\>\""}], "}"}]}], "}"}]}],
+   ";"}]], "Input",
+ CellChangeTimes->{{3.673537339535672*^9, 3.673537355567876*^9}, {
+  3.6735374285422783`*^9, 3.673537474828739*^9}, {3.673537811263246*^9, 
+  3.673537816166811*^9}, {3.673540684522463*^9, 3.673540688761847*^9}, {
+  3.673540742938861*^9, 3.673540779383321*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"s1Univ", "[", 
+  RowBox[{"[", 
+   RowBox[{"1", ",", "1"}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.673540600031046*^9, 3.6735406269577093`*^9}}],
+
+Cell[BoxData["\<\"The\"\>"], "Output",
+ CellChangeTimes->{{3.6735406099221*^9, 3.673540627722021*^9}, 
+   3.6737074283095427`*^9, 3.673716684780842*^9, 3.685021229706827*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"s1Trans", " ", "=", " ", 
+  RowBox[{"StringReplace", "[", 
+   RowBox[{"s1", ",", 
+    RowBox[{"Table", "[", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"s1Code", "[", 
+          RowBox[{"[", "i", "]"}], "]"}], " ", "\[Equal]", " ", "1"}], ",", 
+        RowBox[{
+         RowBox[{"s1Univ", "[", 
+          RowBox[{"[", 
+           RowBox[{"i", ",", "1"}], "]"}], "]"}], "\[Rule]", " ", 
+         RowBox[{"s1Univ", "[", 
+          RowBox[{"[", 
+           RowBox[{"i", ",", "2"}], "]"}], "]"}]}]}], "]"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"i", ",", "1", ",", 
+        RowBox[{"Length", "[", "s1Code", "]"}]}], "}"}]}], "]"}]}], 
+   "]"}]}]], "Input",
+ CellChangeTimes->{{3.6735378196140823`*^9, 3.673537822846305*^9}, {
+  3.6735378887886963`*^9, 3.673537969922761*^9}, {3.6735380387630053`*^9, 
+  3.673538130886656*^9}, {3.673540645942659*^9, 3.673540661535757*^9}, {
+  3.6735408360221357`*^9, 3.673540850737818*^9}, {3.673540898017066*^9, 
+  3.6735409222061987`*^9}, {3.673541033343665*^9, 3.673541081717271*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "StringReplace","srep",
+   "\"\\!\\(\\*RowBox[{\\\"Null\\\"}]\\) is not a valid string replacement \
+rule.\"",2,53,1,15845427176679800653,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6735410949721603`*^9, 3.673707428530727*^9, 
+  3.673716685025958*^9, 3.685021230114048*^9}],
+
+Cell[BoxData[
+ RowBox[{"StringReplace", "[", 
+  RowBox[{"\<\"The lazy brown fox jumped over the green hedge.\"\>", ",", 
+   RowBox[{"{", 
+    RowBox[{"Null", ",", "Null", ",", "Null", ",", 
+     RowBox[{"\<\"hedge.\"\>", "\[Rule]", "\<\"bush.\"\>"}]}], "}"}]}], 
+  "]"}]], "Output",
+ CellChangeTimes->{{3.673537955465641*^9, 3.673537971214589*^9}, 
+   3.673538104706151*^9, 3.673538135325873*^9, 3.673540595836488*^9, 
+   3.6735406636943083`*^9, 3.6735406981502733`*^9, 3.6735409237568197`*^9, 
+   3.67354104991912*^9, 3.67354109497642*^9, 3.673707428553546*^9, 
+   3.673716685035141*^9, 3.685021230171616*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"t", " ", "=", " ", 
+  RowBox[{
+   RowBox[{"Table", "[", 
+    RowBox[{
+     RowBox[{"If", "[", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"s1Code", "[", 
+         RowBox[{"[", "i", "]"}], "]"}], " ", "\[Equal]", " ", "1"}], ",", 
+       RowBox[{
+        RowBox[{"s1Univ", "[", 
+         RowBox[{"[", 
+          RowBox[{"i", ",", "1"}], "]"}], "]"}], "\[Rule]", " ", 
+        RowBox[{"s1Univ", "[", 
+         RowBox[{"[", 
+          RowBox[{"i", ",", "2"}], "]"}], "]"}]}]}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"i", ",", "1", ",", 
+       RowBox[{"Length", "[", "s1Code", "]"}]}], "}"}]}], "]"}], " ", "/.", 
+   " ", 
+   RowBox[{"Null", " ", "\[Rule]", " ", 
+    RowBox[{"Sequence", "[", "]"}]}]}]}]], "Input",
+ CellChangeTimes->{{3.673541146004983*^9, 3.673541169153919*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"hedge.\"\>", "\[Rule]", "\<\"bush.\"\>"}], "}"}]], "Output",
+ CellChangeTimes->{{3.673541142204307*^9, 3.673541170111371*^9}, 
+   3.673707428581401*^9, 3.673716685082677*^9, 3.6850212302242517`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"s1Trans", " ", "=", " ", 
+  RowBox[{"StringReplace", "[", 
+   RowBox[{"s1", ",", "t"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.673541175130485*^9, 3.6735411977702312`*^9}}],
+
+Cell[BoxData["\<\"The lazy brown fox jumped over the green bush.\"\>"], \
+"Output",
+ CellChangeTimes->{3.673541200194868*^9, 3.6737074286103992`*^9, 
+  3.673716685131096*^9, 3.685021230282999*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{"IPCC", " ", "Fourth", " ", "Assessment", " ", 
+    RowBox[{"Report", ":", " ", 
+     RowBox[{"Climate", " ", "Change", " ", "2007.", " ", "Five", " ", 
+      RowBox[{"Conclusions", "."}]}]}]}], " ", "*)"}], "\[IndentingNewLine]", 
+  
+  RowBox[{"(*", " ", 
+   RowBox[{
+    RowBox[{"https", ":"}], "//", 
+    RowBox[{
+     RowBox[{
+      RowBox[{
+       RowBox[{"www", ".", "ipcc", ".", "ch"}], "/", "publications_and"}], 
+      RowBox[{
+       RowBox[{
+        RowBox[{
+         RowBox[{"_data", "/", "ar4"}], "/", "wg2"}], "/", "en"}], "/", 
+       "ch5s5"}]}], "-", 
+     RowBox[{"8.", "html"}]}]}], " ", "*)"}]}]], "Input",
+ CellChangeTimes->{{3.6735416708056927`*^9, 3.673541708562045*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+  "s1", " ", "=", " ", 
+   "\"\<Projected changes in the frequency and severity of extreme climate \
+events will have more serious consequences for food and forestry production, \
+and food insecurity, than will changes in projected means of temperature and \
+precipitation (high confidence).\>\""}], ";"}]], "Input",
+ CellChangeTimes->{{3.673541461006763*^9, 3.6735414923785048`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["s1"], "Input",
+ CellChangeTimes->{{3.6735414963226423`*^9, 3.673541497218367*^9}}],
+
+Cell[BoxData["\<\"Projected changes in the frequency and severity of extreme \
+climate events will have more serious consequences for food and forestry \
+production, and food insecurity, than will changes in projected means of \
+temperature and precipitation (high confidence).\"\>"], "Output",
+ CellChangeTimes->{3.673541497859839*^9, 3.673707428675783*^9, 
+  3.6737166852136793`*^9, 3.6850212304531317`*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+  "s2", " ", "=", " ", 
+   "\"\<Modelling studies suggest that increasing frequency of crop loss due \
+to extreme events, such as droughts and heavy precipitation, may overcome \
+positive effects of moderate temperature increase [5.4.1]. For forests, \
+elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on timber production [5.4.1].\>\""}], ";"}]], "Input",
+ CellChangeTimes->{{3.673541538250305*^9, 3.673541543865898*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+   "s3", " ", "=", " ", 
+    "\"\<Climate change increases the number of people at risk of hunger \
+(high confidence). The impact of chosen socio-economic pathways (SRES \
+scenario) on the numbers of people at risk of hunger is significantly greater \
+than the impact of climate change. Climate change will further shift the \
+focus of food insecurity to sub-Saharan Africa.\>\""}], ";"}], 
+  "\n"}]], "Input",
+ CellChangeTimes->{{3.673541556569951*^9, 3.673541569360712*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"s4", " ", "=", " ", 
+  "\"\<Climate change alone is estimated to increase the number of \
+undernourished people to between 40 million and 170 million. By contrast, the \
+impacts of socio-economic development paths (SRES) can amount to several \
+hundred million people at risk of hunger [5.6.5]. Moreover, climate change is \
+likely to further shift the regional focus of food insecurity to sub-Saharan \
+Africa. By 2080, about 75% of all people at risk of hunger are estimated to \
+live in this region. The effects of climate mitigation measures are likely to \
+remain relatively small in the early decades; significant benefits of \
+mitigation to the agricultural sector may be realised only in the second half \
+of this century, i.e., once the positive CO2 effects on crop yields level off \
+and global mean temperature increases become significantly less than in \
+non-mitigated scenarios [5.6.5].\>\""}]], "Input",
+ CellChangeTimes->{{3.673541585296308*^9, 3.67354160325196*^9}}],
+
+Cell[BoxData["\<\"Climate change alone is estimated to increase the number of \
+undernourished people to between 40 million and 170 million. By contrast, the \
+impacts of socio-economic development paths (SRES) can amount to several \
+hundred million people at risk of hunger [5.6.5]. Moreover, climate change is \
+likely to further shift the regional focus of food insecurity to sub-Saharan \
+Africa. By 2080, about 75% of all people at risk of hunger are estimated to \
+live in this region. The effects of climate mitigation measures are likely to \
+remain relatively small in the early decades; significant benefits of \
+mitigation to the agricultural sector may be realised only in the second half \
+of this century, i.e., once the positive CO2 effects on crop yields level off \
+and global mean temperature increases become significantly less than in \
+non-mitigated scenarios [5.6.5].\"\>"], "Output",
+ CellChangeTimes->{3.6735416062312527`*^9, 3.673707428743647*^9, 
+  3.673716685269967*^9, 3.685021230570677*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"s5", " ", "=", " ", 
+  "\"\<While moderate warming benefits crop and pasture yields in mid-to \
+high-latitude regions,even slight warming decreases yields in seasonally dry \
+and low-latitude regions (medium confidence).\>\""}]], "Input",
+ CellChangeTimes->{{3.6735416187291527`*^9, 3.673541638099987*^9}}],
+
+Cell[BoxData["\<\"While moderate warming benefits crop and pasture yields in \
+mid-to high-latitude regions,even slight warming decreases yields in \
+seasonally dry and low-latitude regions (medium confidence).\"\>"], "Output",
+ CellChangeTimes->{3.673541639280695*^9, 3.6737074287790813`*^9, 
+  3.673716685346044*^9, 3.685021230627265*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"outputs", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{"s1", ",", "s2", ",", "s3", ",", "s4", ",", "s5"}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.673542404602569*^9, 3.6735424283253403`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"s1Switches", " ", "=", " ", 
+  RowBox[{"Pick", "[", 
+   RowBox[{"a1", ",", " ", 
+    RowBox[{"{", 
+     RowBox[{
+     "1", ",", "1", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", ",", 
+      "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", 
+      "0", ",", "0", ",", "1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+    "1"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.673542487328782*^9, 3.673542502125984*^9}, {
+  3.6735425784906673`*^9, 3.673542590109304*^9}, {3.673542790470889*^9, 
+  3.673542807829702*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"0", ",", "0", ",", "0", ",", "1"}], "}"}]], "Output",
+ CellChangeTimes->{3.673542594255245*^9, 3.673542809748267*^9, 
+  3.673707428829398*^9, 3.6737166853884077`*^9, 3.685021230687154*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"s1Changes", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\"\<changes\>\"", ",", " ", "\"\<alterations\>\""}], "}"}], 
+     ",", " ", 
+     RowBox[{"{", 
+      RowBox[{
+      "\"\<severity of extreme climate\>\"", ",", 
+       "\"\<severity of very extreme climate\>\""}], "}"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<means\>\"", ",", " ", "\"\<averages\>\""}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\"\<high\>\"", ",", "\"\<medium\>\""}], "}"}]}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.673542603481914*^9, 3.673542611292663*^9}, {
+  3.673542653367393*^9, 3.673542678786865*^9}, {3.673542736190192*^9, 
+  3.67354274639776*^9}, {3.673542778070776*^9, 3.673542782358509*^9}, {
+  3.67354281509337*^9, 3.673542827781217*^9}, {3.67354288219864*^9, 
+  3.673542893942223*^9}, {3.673542984344861*^9, 3.6735430014083443`*^9}, {
+  3.673543273295424*^9, 3.673543276853162*^9}, {3.67354334103872*^9, 
+  3.673543347898899*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Function 1", "Section",
+ CellChangeTimes->{{3.673681383105282*^9, 3.673681387543701*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"changeOutput", "[", 
+    RowBox[{"output_", ",", " ", "switches_", ",", " ", "changes_"}], "]"}], ":=",
+    " ", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", "trans", "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+       RowBox[{
+       "If", " ", "the", " ", "number", " ", "of", " ", "switches", " ", 
+        RowBox[{"doesn", "'"}], "t", " ", "match", " ", "the", " ", "number", 
+        " ", "of", " ", "changes"}], ",", " ", 
+       RowBox[{"throw", " ", "and", " ", 
+        RowBox[{"error", "."}]}]}], " ", "*)"}], "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"Length", "[", "switches", "]"}], " ", "\[NotEqual]", " ", 
+         RowBox[{"Length", "[", "changes", "]"}]}], ",", " ", 
+        RowBox[{"Return", "[", 
+         RowBox[{
+         "\"\<Please make sure the number of changes is equal to the number \
+of switches and try again. The output you're trying to change is:\\n\\n\>\"", 
+          " ", "<>", " ", "output"}], "]"}]}], "]"}], ";", 
+      "\[IndentingNewLine]", "\[IndentingNewLine]", 
+      RowBox[{"trans", " ", "=", " ", 
+       RowBox[{
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"If", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"switches", "[", 
+              RowBox[{"[", "i", "]"}], "]"}], " ", "\[Equal]", " ", "1"}], 
+            ",", 
+            RowBox[{
+             RowBox[{"changes", "[", 
+              RowBox[{"[", 
+               RowBox[{"i", ",", "1"}], "]"}], "]"}], "\[Rule]", " ", 
+             RowBox[{"changes", "[", 
+              RowBox[{"[", 
+               RowBox[{"i", ",", "2"}], "]"}], "]"}]}]}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", "1", ",", 
+            RowBox[{"Length", "[", "switches", "]"}]}], "}"}]}], "]"}], " ", "/.",
+         " ", 
+        RowBox[{"Null", " ", "\[Rule]", " ", 
+         RowBox[{"Sequence", "[", "]"}]}]}]}], ";", "\[IndentingNewLine]", 
+      "\[IndentingNewLine]", 
+      RowBox[{"(*", " ", 
+       RowBox[{
+       "Pretty", " ", "up", " ", "the", " ", "output", " ", "for", " ", 
+        "display"}], " ", "*)"}], "\[IndentingNewLine]", 
+      RowBox[{"Text", "[", 
+       RowBox[{"Style", "[", 
+        RowBox[{
+         RowBox[{"StringReplace", "[", 
+          RowBox[{"output", ",", " ", "trans"}], "]"}], ",", " ", "Black", 
+         ",", " ", 
+         RowBox[{"FontFamily", "\[Rule]", "\"\<Helvetica\>\""}], ",", " ", 
+         "14"}], "]"}], "]"}]}]}], "\[IndentingNewLine]", "]"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.673543052491397*^9, 3.673543094814105*^9}, {
+  3.673543155049659*^9, 3.673543210718363*^9}, {3.6735433596751947`*^9, 
+  3.6735434823521767`*^9}, {3.673543512441783*^9, 3.6735435413068323`*^9}, {
+  3.673543663459098*^9, 3.673543668791019*^9}, {3.673544299482531*^9, 
+  3.673544329894946*^9}, {3.673544371850792*^9, 3.673544393143917*^9}, {
+  3.6735456895699387`*^9, 3.673545696696231*^9}, {3.6735462628170967`*^9, 
+  3.673546263542819*^9}, {3.6735463771322517`*^9, 3.673546403073493*^9}, {
+  3.673546509533396*^9, 3.673546511371441*^9}, {3.6735467342757473`*^9, 
+  3.6735467376335287`*^9}, {3.673546875080329*^9, 3.673546882127778*^9}, {
+  3.673546933334552*^9, 3.673546938044134*^9}, {3.673547128408758*^9, 
+  3.673547129208877*^9}, {3.673547807520133*^9, 3.6735478816369877`*^9}, {
+  3.673548397423623*^9, 3.673548399101605*^9}, {3.673548481614913*^9, 
+  3.6735484901869087`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"changeOutput", "[", 
+  RowBox[{"s1", ",", " ", "s1Switches", ",", " ", "s1Changes"}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.673543215388667*^9, 3.6735432326712418`*^9}, {
+  3.673543491995178*^9, 3.6735435039747267`*^9}, {3.673543672383645*^9, 
+  3.6735436758556023`*^9}, {3.67354434401772*^9, 3.673544352175734*^9}, {
+  3.6735457056339083`*^9, 3.6735457087103662`*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[Cell[BoxData[
+   FormBox[
+    StyleBox["\<\"Projected changes in the frequency and severity of extreme \
+climate events will have more serious consequences for food and forestry \
+production, and food insecurity, than will changes in projected means of \
+temperature and precipitation (medium confidence).\"\>",
+     StripOnInput->False,
+     LineColor->GrayLevel[0],
+     FrontFaceColor->GrayLevel[0],
+     BackFaceColor->GrayLevel[0],
+     GraphicsColor->GrayLevel[0],
+     FontFamily->"Helvetica",
+     FontSize->14,
+     FontColor->GrayLevel[0]], TextForm]], "InlineText"],
+  Text[
+   Style["Projected changes in the frequency and severity of extreme climate \
+events will have more serious consequences for food and forestry production, \
+and food insecurity, than will changes in projected means of temperature and \
+precipitation (medium confidence).", 
+    GrayLevel[0], FontFamily -> "Helvetica", 14]]]], "Output",
+ CellChangeTimes->{
+  3.673543234721403*^9, {3.673543495497381*^9, 3.6735435045810127`*^9}, 
+   3.673543548285754*^9, 3.673543676535747*^9, {3.6735443623655376`*^9, 
+   3.673544399249181*^9}, 3.6735457093692837`*^9, {3.673547839212389*^9, 
+   3.673547874284726*^9}, 3.6735481502977333`*^9, 3.673707428981352*^9, 
+   3.6737166854668083`*^9, 3.685021230762446*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"s2Switches", " ", "=", " ", 
+  RowBox[{"Pick", "[", 
+   RowBox[{"a1", ",", " ", 
+    RowBox[{"{", 
+     RowBox[{
+     "1", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", ",", 
+      "0", ",", "0", ",", "0", ",", "1", ",", "0", ",", "0", ",", "0", ",", 
+      "1", ",", "0", ",", "1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+    "1"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.673543725200077*^9, 3.6735437699747143`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"0", ",", "0", ",", "1", ",", "1", ",", "1"}], "}"}]], "Output",
+ CellChangeTimes->{3.673543773309822*^9, 3.6737074290630903`*^9, 
+  3.6737166855199413`*^9, 3.685021230786215*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"s2Changes", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\"\<Modeling\>\"", ",", " ", "\"\<Simulation\>\""}], "}"}], 
+     ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<suggest\>\"", ",", " ", "\"\<do not suggest\>\""}], "}"}], 
+     ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<overcome\>\"", ",", " ", "\"\<overwhelm\>\""}], "}"}], ",",
+      " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<5.4.1\>\"", ",", " ", "\"\<5.4.2\>\""}], "}"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<timber\>\"", ",", " ", "\"\<forestry\>\""}], "}"}]}], 
+    "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.673543781068715*^9, 3.673543912380373*^9}, {
+  3.6735440063717318`*^9, 3.673544018619501*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"changeOutput", "[", 
+  RowBox[{"s2", ",", "s2Switches", ",", "s2Changes"}], "]"}]], "Input",
+ CellChangeTimes->{{3.673544036380446*^9, 3.673544053441321*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[Cell[BoxData[
+   FormBox[
+    StyleBox["\<\"Modelling studies suggest that increasing frequency of crop \
+loss due to extreme events, such as droughts and heavy precipitation, may \
+overwhelm positive effects of moderate temperature increase [5.4.2]. For \
+forests, elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on forestry production [5.4.2].\"\>",
+     StripOnInput->False,
+     LineColor->GrayLevel[0],
+     FrontFaceColor->GrayLevel[0],
+     BackFaceColor->GrayLevel[0],
+     GraphicsColor->GrayLevel[0],
+     FontFamily->"Helvetica",
+     FontSize->14,
+     FontColor->GrayLevel[0]], TextForm]], "InlineText"],
+  Text[
+   Style["Modelling studies suggest that increasing frequency of crop loss \
+due to extreme events, such as droughts and heavy precipitation, may \
+overwhelm positive effects of moderate temperature increase [5.4.2]. For \
+forests, elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on forestry production [5.4.2].", 
+    GrayLevel[0], FontFamily -> "Helvetica", 14]]]], "Output",
+ CellChangeTimes->{3.6735440555771313`*^9, 3.673707429113648*^9, 
+  3.673716685591689*^9, 3.685021230860279*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Function 2", "Section",
+ CellChangeTimes->{{3.673681394823022*^9, 3.673681396871611*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"generateOutput", "[", 
+    RowBox[{
+    "answerBits_", ",", " ", "outputs_", ",", " ", "switches_", ",", " ", 
+     "changes_"}], "]"}], ":=", " ", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"outputSwitches", ",", " ", "changedOutputs", ",", " ", 
+       RowBox[{"header", " ", "=", " ", 
+        RowBox[{"Style", "[", 
+         RowBox[{"\"\<Conclusions\>\"", ",", "\"\<Subtitle\>\""}], "]"}]}], 
+       ",", " ", 
+       RowBox[{"footer", " ", "=", " ", 
+        RowBox[{"Text", "[", 
+         RowBox[{"Style", "[", 
+          RowBox[{"\"\<Standard Footer\>\"", ",", "Orange", ",", "12"}], 
+          "]"}], "]"}]}], ",", " ", "out"}], "}"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+       RowBox[{
+        RowBox[{
+        "answerBits", " ", "is", " ", "the", " ", "complete", " ", "string", 
+         " ", "of", " ", "yes"}], "-", 
+        RowBox[{
+        "no", " ", "answers", " ", "represented", " ", "as", " ", "a", " ", 
+         "list", " ", "of", " ", 
+         RowBox[{"1", "'"}], "s", " ", "and", " ", 
+         RowBox[{"0", "'"}], 
+         RowBox[{"s", " ", "--"}], " ", 
+         RowBox[{"e", ".", "g", "."}]}]}], ",", " ", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "0", ",", "0", ",", "1", ",", "...", ",", "1"}], 
+        "}"}]}], " ", "*)"}], "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+      "outputs", " ", "is", " ", "the", " ", "list", " ", "of", " ", "all", 
+       " ", 
+       RowBox[{"core", "/", "original"}], " ", "output", " ", "messages"}], 
+      " ", "*)"}], "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+      "switches", " ", "is", " ", "a", " ", "list", " ", "of", " ", 
+       "switches", " ", "for", " ", "each", " ", "output", " ", "message"}], 
+      " ", "*)"}], "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+      "changes", " ", "is", " ", "a", " ", "list", " ", "of", " ", "changes", 
+       " ", "for", " ", "each", " ", "output", " ", "message"}], " ", "*)"}], 
+     "\[IndentingNewLine]", "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+       RowBox[{"For", " ", "each", " ", "output"}], ",", " ", 
+       RowBox[{
+       "construct", " ", "the", " ", "values", " ", "of", " ", "the", " ", 
+        "switches"}]}], " ", "*)"}], "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"outputSwitches", " ", "=", " ", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"Pick", "[", 
+          RowBox[{"answerBits", ",", " ", "#", ",", " ", "1"}], "]"}], " ", 
+         "&"}], " ", "/@", " ", "switches"}]}], ";", "\[IndentingNewLine]", 
+      "\[IndentingNewLine]", 
+      RowBox[{"(*", " ", 
+       RowBox[{
+        RowBox[{"For", " ", "each", " ", "output"}], ",", " ", 
+        RowBox[{
+        "construct", " ", "the", " ", "transformed", " ", "output"}]}], " ", 
+       "*)"}], "\[IndentingNewLine]", 
+      RowBox[{"changedOutputs", " ", "=", " ", 
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"changeOutput", "[", 
+          RowBox[{
+           RowBox[{"outputs", "[", 
+            RowBox[{"[", "i", "]"}], "]"}], ",", " ", 
+           RowBox[{"outputSwitches", "[", 
+            RowBox[{"[", "i", "]"}], "]"}], ",", " ", 
+           RowBox[{"changes", "[", 
+            RowBox[{"[", "i", "]"}], "]"}]}], "]"}], ",", " ", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", "1", ",", 
+           RowBox[{"Length", "[", "outputs", "]"}]}], "}"}]}], "]"}]}], " ", 
+      ";", "\[IndentingNewLine]", "\[IndentingNewLine]", 
+      RowBox[{"(*", " ", 
+       RowBox[{"Add", " ", "the", " ", "header", " ", "and", " ", "footer"}], 
+       " ", "*)"}], "\[IndentingNewLine]", 
+      RowBox[{"out", " ", "=", " ", 
+       RowBox[{"Prepend", "[", 
+        RowBox[{
+         RowBox[{"Append", "[", 
+          RowBox[{
+           RowBox[{"Prepend", "[", 
+            RowBox[{"changedOutputs", ",", " ", "header"}], "]"}], ",", " ", 
+           "footer"}], "]"}], ",", " ", 
+         RowBox[{"\"\<Response = \>\"", " ", "<>", " ", 
+          RowBox[{"ToString", "[", "answerBits", "]"}], " ", "<>", " ", 
+          "\"\<\\n\>\""}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+      "\[IndentingNewLine]", 
+      RowBox[{"(*", " ", 
+       RowBox[{
+       "Ready", " ", "the", " ", "outputs", " ", "for", " ", "display"}], " ",
+        "*)"}], "\[IndentingNewLine]", 
+      RowBox[{"Fold", "[", 
+       RowBox[{"StringJoin", ",", " ", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"ToString", "[", 
+            RowBox[{"#", ",", "StandardForm"}], "]"}], "<>", " ", 
+           "\"\<\\n\>\""}], " ", "&"}], "/@", "out"}]}], "]"}]}]}], 
+    "\[IndentingNewLine]", "\[IndentingNewLine]", "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.673544181544615*^9, 3.6735441858244867`*^9}, {
+   3.673544222452763*^9, 3.6735442679255857`*^9}, {3.673544465391254*^9, 
+   3.673544540606879*^9}, {3.673544575412582*^9, 3.673544653202079*^9}, {
+   3.673544756956077*^9, 3.673544815466468*^9}, {3.67354484561157*^9, 
+   3.673544981881365*^9}, {3.673545019759907*^9, 3.673545031164879*^9}, {
+   3.6735450647823544`*^9, 3.6735450656924343`*^9}, {3.673545197609294*^9, 
+   3.67354520686366*^9}, {3.67354533090346*^9, 3.673545340118116*^9}, {
+   3.673545435631991*^9, 3.673545564401504*^9}, {3.673545748840592*^9, 
+   3.673545779638142*^9}, 3.673545902287331*^9, {3.6735470538704147`*^9, 
+   3.673547066246893*^9}, 3.673547098292573*^9, {3.6735472312579613`*^9, 
+   3.6735474269423323`*^9}, {3.673547484707959*^9, 3.673547558113434*^9}, {
+   3.673547683861779*^9, 3.67354771059522*^9}, {3.673547744051708*^9, 
+   3.673547767506184*^9}, {3.673548000082489*^9, 3.673548085567037*^9}, {
+   3.6735481807268057`*^9, 3.673548182012628*^9}, {3.673548222548793*^9, 
+   3.673548231411686*^9}, {3.673548310018435*^9, 3.6735483247129297`*^9}, {
+   3.673548365886585*^9, 3.673548371133779*^9}, {3.673548427165649*^9, 
+   3.673548454405171*^9}, {3.673548499287147*^9, 3.673548502010723*^9}, {
+   3.6735487412223787`*^9, 3.673548746450432*^9}, {3.673600039556875*^9, 
+   3.673600047298112*^9}, {3.673600122225154*^9, 3.6736001248557243`*^9}, {
+   3.673709728474412*^9, 3.673709753560299*^9}, {3.673709812129006*^9, 
+   3.673709817993071*^9}, {3.673712009177414*^9, 3.673712098272627*^9}, {
+   3.673712156102203*^9, 3.673712159668599*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"{", 
+   RowBox[{"s1", ",", "s2"}], "}"}], "[", 
+  RowBox[{"[", "1", "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.673545274267908*^9, 3.673545290775317*^9}, {
+  3.673545365935487*^9, 3.6735453675355473`*^9}}],
+
+Cell[BoxData["\<\"Projected changes in the frequency and severity of extreme \
+climate events will have more serious consequences for food and forestry \
+production, and food insecurity, than will changes in projected means of \
+temperature and precipitation (high confidence).\"\>"], "Output",
+ CellChangeTimes->{3.673545291413959*^9, 3.6735453682757397`*^9, 
+  3.673707429179452*^9, 3.673716685703373*^9, 3.685021230924679*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"s2Changes", " ", "//", " ", "Length"}]], "Input",
+ CellChangeTimes->{{3.673545403029386*^9, 3.6735454272362003`*^9}}],
+
+Cell[BoxData["5"], "Output",
+ CellChangeTimes->{{3.6735454067580347`*^9, 3.673545427836351*^9}, 
+   3.673707429215534*^9, 3.673716685751967*^9, 3.685021230984806*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"g1", " ", "=", " ", 
+  RowBox[{"generateOutput", "[", 
+   RowBox[{"a1", ",", " ", 
+    RowBox[{"{", 
+     RowBox[{"s1", ",", "s2"}], "}"}], ",", " ", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+       "1", ",", "1", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", ",", 
+        "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", 
+        "0", ",", "0", ",", "1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+      " ", 
+      RowBox[{"{", 
+       RowBox[{
+       "1", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", ",", 
+        "0", ",", "0", ",", "0", ",", "1", ",", "0", ",", "0", ",", "0", ",", 
+        "1", ",", "0", ",", "1", ",", "0", ",", "0", ",", "0"}], "}"}]}], 
+     "}"}], ",", " ", 
+    RowBox[{"{", 
+     RowBox[{"s1Changes", ",", "s2Changes"}], "}"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.673545008193866*^9, 3.673545114653461*^9}, {
+  3.6735459075189247`*^9, 3.673545909491611*^9}}],
+
+Cell[BoxData["\<\"\\!\\(\\*RowBox[{\\\"\\\\\\\"Response = {0, 0, 0, 1, 0, 1, \
+0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, \
+0}\\\\\\\\n\\\\\\\"\\\"}]\\)\\n\\!\\(\\*StyleBox[\\\"\\\\\\\"Conclusions\\\\\\\
+\"\\\", \\\"Subtitle\\\", Rule[StripOnInput, \
+False]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\
+\\\"Projected changes in the frequency and severity of extreme climate events \
+will have more serious consequences for food and forestry production, and \
+food insecurity, than will changes in projected means of temperature and \
+precipitation (medium confidence).\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Projected changes in the \
+frequency and severity of extreme climate events will have more serious \
+consequences for food and forestry production, and food insecurity, than will \
+changes in projected means of temperature and precipitation (medium \
+confidence).\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14]]]\\)\
+\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\"\
+Modelling studies suggest that increasing frequency of crop loss due to \
+extreme events, such as droughts and heavy precipitation, may overwhelm \
+positive effects of moderate temperature increase [5.4.2]. For forests, \
+elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on forestry production [5.4.2].\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Modelling studies suggest \
+that increasing frequency of crop loss due to extreme events, such as \
+droughts and heavy precipitation, may overwhelm positive effects of moderate \
+temperature increase [5.4.2]. For forests, elevated risks of fires, insect \
+outbreaks, wind damage and other forest-disturbance events are projected, \
+although little is known about their overall effect on forestry production \
+[5.4.2].\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"Standard Footer\\\\\\\"\\\", RGBColor[1, 0.5`, 0], 12, Rule[StripOnInput, \
+False]], TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Standard Footer\\\", \
+RGBColor[1, 0.5`, 0], 12]]]\\)\\n\"\>"], "Output",
+ CellChangeTimes->{
+  3.673545116867095*^9, 3.6735452156472063`*^9, {3.6735454650667477`*^9, 
+   3.673545488307054*^9}, 3.673545531818227*^9, {3.673545572071824*^9, 
+   3.673545582154521*^9}, 3.673545722185267*^9, 3.673545910587586*^9, 
+   3.6735462743784933`*^9, 3.673546434409071*^9, 3.673546525969181*^9, 
+   3.673546797180723*^9, 3.673546845704844*^9, 3.673546904524199*^9, 
+   3.673546945343816*^9, {3.6735470893876333`*^9, 3.673547138700835*^9}, 
+   3.6735474364114122`*^9, 3.673547566232841*^9, 3.673548116130863*^9, 
+   3.67354819662778*^9, 3.6735482405196877`*^9, 3.673548332071287*^9, {
+   3.6735483829726152`*^9, 3.673548410533072*^9}, 3.673548465030756*^9, 
+   3.6735485152480164`*^9, 3.673548755445896*^9, 3.6736000636298637`*^9, 
+   3.67370742925105*^9, {3.6737120371728287`*^9, 3.673712062897592*^9}, 
+   3.673712109648363*^9, 3.673716685799999*^9, 3.6850212310434847`*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["The Full Solution", "Section",
+ CellChangeTimes->{{3.673549012432626*^9, 3.673549016614957*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Assumptions", "Subsection",
+ CellChangeTimes->{{3.6735490885133257`*^9, 3.673549089905094*^9}}],
+
+Cell[TextData[{
+ "1) Survey consists of 20 yes-no questions. A complete set of responses to a \
+single survey is represented as a string of 20 ones and zeros depending on \
+whether the respondent answered \[OpenCurlyDoubleQuote]yes\
+\[CloseCurlyDoubleQuote] or \[OpenCurlyDoubleQuote]no\[CloseCurlyDoubleQuote] \
+respectively.\n2) The core output messages can be created with relative ease.\
+\n3) The changes to each core message depend on \
+\[OpenCurlyDoubleQuote]switches\[CloseCurlyDoubleQuote], i.e., answers to \
+particular questions. For example, the alterations to the first core message \
+may depend on answers to questions 3, 12, and 20.\n4) A message is altered \
+based on ",
+ StyleBox["each individual switch ",
+  FontSlant->"Italic"],
+ "that it depends on; the alteration does not depend on the value of all of \
+the switches taken together. This is a simplifying assumption that ignores \
+context.\n5) A message can be altered in any of the following ways: changes \
+to words, changes to phrases, changes to the ordering of the \
+phrases/sentences, deletion of words/phrases, or deletion of the message as a \
+whole."
+}], "Subsubsection",
+ CellChangeTimes->{{3.673549295046679*^9, 3.6735497147351*^9}, 
+   3.68502110359024*^9, {3.685021263736104*^9, 3.685021266565207*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Potential Extensions (not yet done)", "Subsection",
+ CellChangeTimes->{{3.673549830827743*^9, 3.67354983337983*^9}, {
+  3.673549920028743*^9, 3.6735499394437523`*^9}}],
+
+Cell["\<\
+1) Make changes based on the entire pattern of switch values rather than \
+making changes based on the individual values of each switch.
+2) Include changes in the ordering of messages.\
+\>", "Subsubsection",
+ CellChangeTimes->{{3.673549844450884*^9, 3.673549908162862*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["The Core Output Messages ", "Subsection",
+ CellChangeTimes->{{3.673549023254146*^9, 3.6735490251654053`*^9}, {
+  3.673549078787499*^9, 3.6735492320937862`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+From \[OpenCurlyDoubleQuote]Climate Change 2007: Working Group II: Impacts, \
+Adaptation and Vulnerability\[CloseCurlyDoubleQuote], IPCC Fourth Assessment \
+Report: Climate Change 2007,  \
+(https://www.ipcc.ch/publications_and_data/ar4/wg2/en/ch5s5-8.html).\
+\>", "Subsubsection",
+ CellChangeTimes->{{3.673549238650464*^9, 3.6735492583181143`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+  "m1", " ", "=", " ", 
+   "\"\<Projected changes in the frequency and severity of extreme climate \
+events will have more serious consequences for food and forestry production, \
+and food insecurity, than will changes in projected means of temperature and \
+precipitation (high confidence).\>\""}], ";"}]], "Input",
+ CellChangeTimes->{{3.673541461006763*^9, 3.6735414923785048`*^9}, {
+  3.673550468013225*^9, 3.6735504704916286`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+  "m2", " ", "=", " ", 
+   "\"\<Modelling studies suggest that increasing frequency of crop loss due \
+to extreme events, such as droughts and heavy precipitation, may overcome \
+positive effects of moderate temperature increase [5.4.1]. For forests, \
+elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on timber production [5.4.1].\>\""}], ";"}]], "Input",
+ CellChangeTimes->{{3.673541538250305*^9, 3.673541543865898*^9}, {
+  3.673550474122904*^9, 3.673550474859177*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+  "m3", " ", "=", " ", 
+   "\"\<Climate change increases the number of people at risk of hunger (high \
+confidence). The impact of chosen socio-economic pathways (SRES scenario) on \
+the numbers of people at risk of hunger is significantly greater than the \
+impact of climate change. Climate change will further shift the focus of food \
+insecurity to sub-Saharan Africa.\>\""}], ";"}]], "Input",
+ CellChangeTimes->{{3.673541556569951*^9, 3.673541569360712*^9}, 
+   3.6735492715268583`*^9, {3.673550477210862*^9, 3.6735504779867477`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+  "m4", " ", "=", " ", 
+   "\"\<Climate change alone is estimated to increase the number of \
+undernourished people to between 40 million and 170 million. By contrast, the \
+impacts of socio-economic development paths (SRES) can amount to several \
+hundred million people at risk of hunger [5.6.5]. Moreover, climate change is \
+likely to further shift the regional focus of food insecurity to sub-Saharan \
+Africa. By 2080, about 75% of all people at risk of hunger are estimated to \
+live in this region. The effects of climate mitigation measures are likely to \
+remain relatively small in the early decades; significant benefits of \
+mitigation to the agricultural sector may be realised only in the second half \
+of this century, i.e., once the positive CO2 effects on crop yields level off \
+and global mean temperature increases become significantly less than in \
+non-mitigated scenarios [5.6.5].\>\""}], ";"}]], "Input",
+ CellChangeTimes->{{3.673541585296308*^9, 3.67354160325196*^9}, {
+   3.67355048166724*^9, 3.673550483227034*^9}, 3.67355151923953*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+  "m5", " ", "=", " ", 
+   "\"\<While moderate warming benefits crop and pasture yields in mid-to \
+high-latitude regions,even slight warming decreases yields in seasonally dry \
+and low-latitude regions (medium confidence).\>\""}], ";"}]], "Input",
+ CellChangeTimes->{{3.6735416187291527`*^9, 3.673541638099987*^9}, {
+   3.673550486242621*^9, 3.6735504870986023`*^9}, 3.6735515075193357`*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"messages", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{"m1", ",", "m2", ",", "m3", ",", "m4", ",", "m5"}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.6735512260381947`*^9, 3.67355123825054*^9}}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Message Parameters", "Subsection",
+ CellChangeTimes->{{3.673549972475045*^9, 3.673549993216591*^9}, {
+   3.6735500687078257`*^9, 3.673550069220317*^9}, 3.685021123202653*^9}],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Message Switches (i.e., which questions each message is sensitive to)\
+\>", "Subsubsection",
+ CellChangeTimes->{{3.6735500088561707`*^9, 3.6735500147203493`*^9}, {
+   3.673550072299738*^9, 3.673550072700047*^9}, {3.673550244615571*^9, 
+   3.673550274587741*^9}, 3.673551099184993*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m1Switches", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+    "1", ",", "1", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", ",", "0",
+      ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", 
+     ",", "0", ",", "1", ",", "0", ",", "0", ",", "0"}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.673550037521337*^9, 3.673550046681272*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m2Switches", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+    "1", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", ",", "0",
+      ",", "0", ",", "0", ",", "1", ",", "0", ",", "0", ",", "0", ",", "1", 
+     ",", "0", ",", "1", ",", "0", ",", "0", ",", "0"}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.673550078542323*^9, 3.673550107928797*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m3Switches", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+    "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0",
+      ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", 
+     ",", "0", ",", "1", ",", "0", ",", "0", ",", "0"}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.6735501211909027`*^9, 3.6735501519699507`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m4Switches", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+    "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", ",", "1", ",", "0",
+      ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", 
+     ",", "0", ",", "1", ",", "0", ",", "0", ",", "1"}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.6735501588210297`*^9, 3.673550185145048*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m5Switches", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+    "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0",
+      ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", 
+     ",", "0", ",", "0", ",", "0", ",", "1", ",", "0"}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.673550198509987*^9, 3.673550227998803*^9}, {
+  3.673550893256774*^9, 3.6735509115815077`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"mSwitches", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+    "m1Switches", ",", "m2Switches", ",", "m3Switches", ",", "m4Switches", 
+     ",", "m5Switches"}], "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6735510050790873`*^9, 3.6735510282820168`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Message Changes", "Subsubsection",
+ CellChangeTimes->{{3.673550281563018*^9, 3.6735502845630617`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m1Changes", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\"\<changes\>\"", ",", " ", "\"\<alterations\>\""}], "}"}], 
+     ",", " ", 
+     RowBox[{"{", 
+      RowBox[{
+      "\"\<severity of extreme climate\>\"", ",", 
+       "\"\<severity of very extreme climate\>\""}], "}"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<means\>\"", ",", " ", "\"\<averages\>\""}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\"\<high\>\"", ",", "\"\<medium\>\""}], "}"}]}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.673550336180211*^9, 3.6735503369382668`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m2Changes", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\"\<Modeling\>\"", ",", " ", "\"\<Simulation\>\""}], "}"}], 
+     ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<suggest\>\"", ",", " ", "\"\<do not suggest\>\""}], "}"}], 
+     ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<overcome\>\"", ",", " ", "\"\<overwhelm\>\""}], "}"}], ",",
+      " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<5.4.1\>\"", ",", " ", "\"\<5.4.2\>\""}], "}"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<timber\>\"", ",", " ", "\"\<forestry\>\""}], "}"}]}], 
+    "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6735503580117693`*^9, 3.6735503589136753`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{
+    RowBox[{"Note", ":", " ", 
+     RowBox[{
+     "if", " ", "the", " ", "value", " ", "of", " ", "the", " ", "second", 
+      " ", "switch", " ", "is", " ", "1"}]}], ",", " ", 
+    RowBox[{"then", " ", "the", " ", "message", " ", "is", " ", "deleted"}]}],
+    " ", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{"m3Changes", " ", "=", " ", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"\"\<hunger\>\"", ",", " ", "\"\<extreme hunger\>\""}], "}"}], 
+      ",", " ", 
+      RowBox[{"{", 
+       RowBox[{"m3", ",", " ", "\"\<\>\""}], "}"}]}], "}"}]}], 
+   ";"}]}]], "Input",
+ CellChangeTimes->{{3.673550385780342*^9, 3.673550458651198*^9}, {
+  3.673550503313875*^9, 3.673550562579895*^9}, {3.673599650780912*^9, 
+  3.673599660490644*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m4Changes", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+      "\"\<between 40 million and 170 million\>\"", ",", " ", 
+       "\"\<between 80 million and 180 million\>\""}], "}"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<5.6.5\>\"", ",", " ", "\"\<5.6.5.1\>\""}], "}"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<2080\>\"", ",", " ", "\"\<2070\>\""}], "}"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{
+      "\"\< The effects of climate mitigation measures are likely to remain \
+relatively small in the early decades; significant\>\"", ",", " ", 
+       "\"\< Significant\>\""}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+      "\"\<effects on crop yields\>\"", ",", " ", 
+       "\"\<and water vapor effects on crop yields\>\""}], "}"}]}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.673550576862282*^9, 3.673550684395624*^9}, {
+  3.673550738050729*^9, 3.6735508736231413`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{
+    RowBox[{"Note", ":", " ", 
+     RowBox[{"if", " ", "the", " ", "value", " ", "of", " ", "the", " ", 
+      RowBox[{"(", "only", ")"}], " ", "switch", " ", "is", " ", "1"}]}], ",",
+     " ", 
+    RowBox[{"then", " ", "the", " ", "message", " ", "is", " ", "deleted"}]}],
+    " ", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{"m5Changes", " ", "=", " ", 
+    RowBox[{"{", 
+     RowBox[{"{", " ", 
+      RowBox[{"m5", ",", " ", "\"\<\>\""}], "}"}], "}"}]}], ";"}]}]], "Input",\
+
+ CellChangeTimes->{{3.6735508793013487`*^9, 3.673550883118478*^9}, {
+  3.6735509272810993`*^9, 3.67355098853699*^9}, {3.6735513409962273`*^9, 
+  3.673551345274397*^9}, {3.673551382075922*^9, 3.67355138644112*^9}, {
+  3.673551462893909*^9, 3.673551468747839*^9}, {3.673599504808983*^9, 
+  3.673599520187549*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"mChanges", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+    "m1Changes", ",", "m2Changes", ",", "m3Changes", ",", "m4Changes", ",", 
+     "m5Changes"}], "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6735510341543207`*^9, 3.673551052792643*^9}}]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Test", "Section",
+ CellChangeTimes->{{3.6735511500994997`*^9, 3.673551160657509*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"randomAnswer", " ", "=", " ", 
+  RowBox[{"RandomInteger", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"0", ",", "1"}], "}"}], ",", "20"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.673551164247143*^9, 3.673551188257299*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "0", ",", "1", ",", "0", ",", "1", ",", "1", ",", "1", ",", "1", ",", "0", 
+   ",", "0", ",", "0", ",", "1", ",", "0", ",", "1", ",", "0", ",", "1", ",", 
+   "0", ",", "0", ",", "1", ",", "0", ",", "1"}], "}"}]], "Output",
+ CellChangeTimes->{3.673551190200601*^9, 3.6735515789172897`*^9, 
+  3.673599583087788*^9, 3.673707429617881*^9, 3.673716686074678*^9, 
+  3.685021231391868*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"generateOutput", "[", 
+  RowBox[{
+  "randomAnswer", ",", "messages", ",", " ", "mSwitches", ",", " ", 
+   "mChanges"}], "]"}]], "Input",
+ CellChangeTimes->{{3.673551195534486*^9, 3.6735511993789577`*^9}, {
+  3.67355124457587*^9, 3.673551261728656*^9}}],
+
+Cell[BoxData["\<\"\\!\\(\\*RowBox[{\\\"\\\\\\\"Response = {0, 1, 0, 1, 1, 1, \
+1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, \
+1}\\\\\\\\n\\\\\\\"\\\"}]\\)\\n\\!\\(\\*StyleBox[\\\"\\\\\\\"Conclusions\\\\\\\
+\"\\\", \\\"Subtitle\\\", Rule[StripOnInput, \
+False]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\
+\\\"Projected changes in the frequency and severity of very extreme climate \
+events will have more serious consequences for food and forestry production, \
+and food insecurity, than will changes in projected averages of temperature \
+and precipitation (high confidence).\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Projected changes in the \
+frequency and severity of very extreme climate events will have more serious \
+consequences for food and forestry production, and food insecurity, than will \
+changes in projected averages of temperature and precipitation (high \
+confidence).\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14]]]\\)\
+\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\"\
+Modelling studies do not suggest that increasing frequency of crop loss due \
+to extreme events, such as droughts and heavy precipitation, may overwhelm \
+positive effects of moderate temperature increase [5.4.2]. For forests, \
+elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on timber production [5.4.2].\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Modelling studies do not \
+suggest that increasing frequency of crop loss due to extreme events, such as \
+droughts and heavy precipitation, may overwhelm positive effects of moderate \
+temperature increase [5.4.2]. For forests, elevated risks of fires, insect \
+outbreaks, wind damage and other forest-disturbance events are projected, \
+although little is known about their overall effect on timber production \
+[5.4.2].\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"Climate change increases the number of people at risk of extreme hunger \
+(high confidence). The impact of chosen socio-economic pathways (SRES \
+scenario) on the numbers of people at risk of extreme hunger is significantly \
+greater than the impact of climate change. Climate change will further shift \
+the focus of food insecurity to sub-Saharan Africa.\\\\\\\"\\\", \
+GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, \
+False]], TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Climate change \
+increases the number of people at risk of extreme hunger (high confidence). \
+The impact of chosen socio-economic pathways (SRES scenario) on the numbers \
+of people at risk of extreme hunger is significantly greater than the impact \
+of climate change. Climate change will further shift the focus of food \
+insecurity to sub-Saharan Africa.\\\", GrayLevel[0], Rule[FontFamily, \
+\\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"Climate change alone is estimated to increase the number of undernourished \
+people to between 80 million and 180 million. By contrast, the impacts of \
+socio-economic development paths (SRES) can amount to several hundred million \
+people at risk of hunger [5.6.5.1]. Moreover, climate change is likely to \
+further shift the regional focus of food insecurity to sub-Saharan Africa. By \
+2070, about 75% of all people at risk of hunger are estimated to live in this \
+region. The effects of climate mitigation measures are likely to remain \
+relatively small in the early decades; significant benefits of mitigation to \
+the agricultural sector may be realised only in the second half of this \
+century, i.e., once the positive CO2 and water vapor effects on crop yields \
+level off and global mean temperature increases become significantly less \
+than in non-mitigated scenarios [5.6.5.1].\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Climate change alone is \
+estimated to increase the number of undernourished people to between 80 \
+million and 180 million. By contrast, the impacts of socio-economic \
+development paths (SRES) can amount to several hundred million people at risk \
+of hunger [5.6.5.1]. Moreover, climate change is likely to further shift the \
+regional focus of food insecurity to sub-Saharan Africa. By 2070, about 75% \
+of all people at risk of hunger are estimated to live in this region. The \
+effects of climate mitigation measures are likely to remain relatively small \
+in the early decades; significant benefits of mitigation to the agricultural \
+sector may be realised only in the second half of this century, i.e., once \
+the positive CO2 and water vapor effects on crop yields level off and global \
+mean temperature increases become significantly less than in non-mitigated \
+scenarios [5.6.5.1].\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"While moderate warming benefits crop and pasture yields in mid-to \
+high-latitude regions,even slight warming decreases yields in seasonally dry \
+and low-latitude regions (medium confidence).\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"While moderate warming \
+benefits crop and pasture yields in mid-to high-latitude regions,even slight \
+warming decreases yields in seasonally dry and low-latitude regions (medium \
+confidence).\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14]]]\\)\
+\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\"\
+Standard Footer\\\\\\\"\\\", RGBColor[1, 0.5`, 0], 12, Rule[StripOnInput, \
+False]], TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Standard Footer\\\", \
+RGBColor[1, 0.5`, 0], 12]]]\\)\\n\"\>"], "Output",
+ CellChangeTimes->{3.6735512627752533`*^9, 3.673551311004386*^9, 
+  3.6735513577336597`*^9, 3.673551408188574*^9, 3.6735514804882393`*^9, 
+  3.673551583131275*^9, 3.67359953889786*^9, 3.6735995883578663`*^9, 
+  3.673599685417499*^9, 3.6736000748282757`*^9, 3.6736001423892803`*^9, 
+  3.673707429648878*^9, 3.673709768631674*^9, 3.6737098366075163`*^9, 
+  3.673716686101013*^9, 3.685021231451572*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"generateOutput", "[", 
+    RowBox[{
+    "#", ",", "messages", ",", " ", "mSwitches", ",", " ", "mChanges"}], 
+    "]"}], " ", "&"}], " ", "/@", " ", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"RandomInteger", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"0", ",", "1"}], "}"}], ",", "20"}], "]"}], ",", " ", 
+    RowBox[{"RandomInteger", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"0", ",", "1"}], "}"}], ",", "20"}], "]"}], ",", " ", 
+    RowBox[{"RandomInteger", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"0", ",", "1"}], "}"}], ",", "20"}], "]"}]}], "}"}]}]], "Input",\
+
+ CellChangeTimes->{{3.673551195534486*^9, 3.6735511993789577`*^9}, {
+  3.67355124457587*^9, 3.673551261728656*^9}, {3.673600493202031*^9, 
+  3.6736005159138308`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"\\!\\(\\*RowBox[{\\\"\\\\\\\"Response = {0, 1, 0, 1, 1, 1, 1, \
+1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, \
+1}\\\\\\\\n\\\\\\\"\\\"}]\\)\\n\\!\\(\\*StyleBox[\\\"\\\\\\\"Conclusions\\\\\\\
+\"\\\", \\\"Subtitle\\\", Rule[StripOnInput, \
+False]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\
+\\\"Projected changes in the frequency and severity of very extreme climate \
+events will have more serious consequences for food and forestry production, \
+and food insecurity, than will changes in projected averages of temperature \
+and precipitation (high confidence).\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Projected changes in the \
+frequency and severity of very extreme climate events will have more serious \
+consequences for food and forestry production, and food insecurity, than will \
+changes in projected averages of temperature and precipitation (high \
+confidence).\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14]]]\\)\
+\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\"\
+Modelling studies do not suggest that increasing frequency of crop loss due \
+to extreme events, such as droughts and heavy precipitation, may overwhelm \
+positive effects of moderate temperature increase [5.4.1]. For forests, \
+elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on timber production [5.4.1].\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Modelling studies do not \
+suggest that increasing frequency of crop loss due to extreme events, such as \
+droughts and heavy precipitation, may overwhelm positive effects of moderate \
+temperature increase [5.4.1]. For forests, elevated risks of fires, insect \
+outbreaks, wind damage and other forest-disturbance events are projected, \
+although little is known about their overall effect on timber production \
+[5.4.1].\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"Climate change increases the number of people at risk of hunger (high \
+confidence). The impact of chosen socio-economic pathways (SRES scenario) on \
+the numbers of people at risk of hunger is significantly greater than the \
+impact of climate change. Climate change will further shift the focus of food \
+insecurity to sub-Saharan Africa.\\\\\\\"\\\", GrayLevel[0], Rule[FontFamily, \
+\\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], TextForm]], \
+\\\"InlineText\\\"], Text[Style[\\\"Climate change increases the number of \
+people at risk of hunger (high confidence). The impact of chosen \
+socio-economic pathways (SRES scenario) on the numbers of people at risk of \
+hunger is significantly greater than the impact of climate change. Climate \
+change will further shift the focus of food insecurity to sub-Saharan Africa.\
+\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"Climate change alone is estimated to increase the number of undernourished \
+people to between 80 million and 180 million. By contrast, the impacts of \
+socio-economic development paths (SRES) can amount to several hundred million \
+people at risk of hunger [5.6.5.1]. Moreover, climate change is likely to \
+further shift the regional focus of food insecurity to sub-Saharan Africa. By \
+2080, about 75% of all people at risk of hunger are estimated to live in this \
+region. The effects of climate mitigation measures are likely to remain \
+relatively small in the early decades; significant benefits of mitigation to \
+the agricultural sector may be realised only in the second half of this \
+century, i.e., once the positive CO2 and water vapor effects on crop yields \
+level off and global mean temperature increases become significantly less \
+than in non-mitigated scenarios [5.6.5.1].\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Climate change alone is \
+estimated to increase the number of undernourished people to between 80 \
+million and 180 million. By contrast, the impacts of socio-economic \
+development paths (SRES) can amount to several hundred million people at risk \
+of hunger [5.6.5.1]. Moreover, climate change is likely to further shift the \
+regional focus of food insecurity to sub-Saharan Africa. By 2080, about 75% \
+of all people at risk of hunger are estimated to live in this region. The \
+effects of climate mitigation measures are likely to remain relatively small \
+in the early decades; significant benefits of mitigation to the agricultural \
+sector may be realised only in the second half of this century, i.e., once \
+the positive CO2 and water vapor effects on crop yields level off and global \
+mean temperature increases become significantly less than in non-mitigated \
+scenarios [5.6.5.1].\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"\\\\\\\"\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14, \
+Rule[StripOnInput, False]], TextForm]], \\\"InlineText\\\"], \
+Text[Style[\\\"\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14]]]\
+\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\"\
+Standard Footer\\\\\\\"\\\", RGBColor[1, 0.5`, 0], 12, Rule[StripOnInput, \
+False]], TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Standard Footer\\\", \
+RGBColor[1, 0.5`, 0], 12]]]\\)\\n\"\>", 
+   ",", "\<\"\\!\\(\\*RowBox[{\\\"\\\\\\\"Response = {0, 0, 1, 1, 1, 1, 1, 1, \
+1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, \
+0}\\\\\\\\n\\\\\\\"\\\"}]\\)\\n\\!\\(\\*StyleBox[\\\"\\\\\\\"Conclusions\\\\\\\
+\"\\\", \\\"Subtitle\\\", Rule[StripOnInput, \
+False]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\
+\\\"Projected changes in the frequency and severity of extreme climate events \
+will have more serious consequences for food and forestry production, and \
+food insecurity, than will changes in projected averages of temperature and \
+precipitation (high confidence).\\\\\\\"\\\", GrayLevel[0], Rule[FontFamily, \
+\\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], TextForm]], \
+\\\"InlineText\\\"], Text[Style[\\\"Projected changes in the frequency and \
+severity of extreme climate events will have more serious consequences for \
+food and forestry production, and food insecurity, than will changes in \
+projected averages of temperature and precipitation (high confidence).\\\", \
+GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"Modelling studies do not suggest that increasing frequency of crop loss due \
+to extreme events, such as droughts and heavy precipitation, may overcome \
+positive effects of moderate temperature increase [5.4.2]. For forests, \
+elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on timber production [5.4.2].\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Modelling studies do not \
+suggest that increasing frequency of crop loss due to extreme events, such as \
+droughts and heavy precipitation, may overcome positive effects of moderate \
+temperature increase [5.4.2]. For forests, elevated risks of fires, insect \
+outbreaks, wind damage and other forest-disturbance events are projected, \
+although little is known about their overall effect on timber production \
+[5.4.2].\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"Climate change increases the number of people at risk of extreme hunger \
+(high confidence). The impact of chosen socio-economic pathways (SRES \
+scenario) on the numbers of people at risk of extreme hunger is significantly \
+greater than the impact of climate change. Climate change will further shift \
+the focus of food insecurity to sub-Saharan Africa.\\\\\\\"\\\", \
+GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, \
+False]], TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Climate change \
+increases the number of people at risk of extreme hunger (high confidence). \
+The impact of chosen socio-economic pathways (SRES scenario) on the numbers \
+of people at risk of extreme hunger is significantly greater than the impact \
+of climate change. Climate change will further shift the focus of food \
+insecurity to sub-Saharan Africa.\\\", GrayLevel[0], Rule[FontFamily, \
+\\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"Climate change alone is estimated to increase the number of undernourished \
+people to between 80 million and 180 million. By contrast, the impacts of \
+socio-economic development paths (SRES) can amount to several hundred million \
+people at risk of hunger [5.6.5.1]. Moreover, climate change is likely to \
+further shift the regional focus of food insecurity to sub-Saharan Africa. By \
+2070, about 75% of all people at risk of hunger are estimated to live in this \
+region. The effects of climate mitigation measures are likely to remain \
+relatively small in the early decades; significant benefits of mitigation to \
+the agricultural sector may be realised only in the second half of this \
+century, i.e., once the positive CO2 effects on crop yields level off and \
+global mean temperature increases become significantly less than in \
+non-mitigated scenarios [5.6.5.1].\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Climate change alone is \
+estimated to increase the number of undernourished people to between 80 \
+million and 180 million. By contrast, the impacts of socio-economic \
+development paths (SRES) can amount to several hundred million people at risk \
+of hunger [5.6.5.1]. Moreover, climate change is likely to further shift the \
+regional focus of food insecurity to sub-Saharan Africa. By 2070, about 75% \
+of all people at risk of hunger are estimated to live in this region. The \
+effects of climate mitigation measures are likely to remain relatively small \
+in the early decades; significant benefits of mitigation to the agricultural \
+sector may be realised only in the second half of this century, i.e., once \
+the positive CO2 effects on crop yields level off and global mean temperature \
+increases become significantly less than in non-mitigated scenarios \
+[5.6.5.1].\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"\\\\\\\"\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14, \
+Rule[StripOnInput, False]], TextForm]], \\\"InlineText\\\"], \
+Text[Style[\\\"\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14]]]\
+\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\"\
+Standard Footer\\\\\\\"\\\", RGBColor[1, 0.5`, 0], 12, Rule[StripOnInput, \
+False]], TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Standard Footer\\\", \
+RGBColor[1, 0.5`, 0], 12]]]\\)\\n\"\>", 
+   ",", "\<\"\\!\\(\\*RowBox[{\\\"\\\\\\\"Response = {0, 1, 1, 1, 1, 0, 1, 0, \
+0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, \
+1}\\\\\\\\n\\\\\\\"\\\"}]\\)\\n\\!\\(\\*StyleBox[\\\"\\\\\\\"Conclusions\\\\\\\
+\"\\\", \\\"Subtitle\\\", Rule[StripOnInput, \
+False]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\
+\\\"Projected changes in the frequency and severity of very extreme climate \
+events will have more serious consequences for food and forestry production, \
+and food insecurity, than will changes in projected averages of temperature \
+and precipitation (medium confidence).\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Projected changes in the \
+frequency and severity of very extreme climate events will have more serious \
+consequences for food and forestry production, and food insecurity, than will \
+changes in projected averages of temperature and precipitation (medium \
+confidence).\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14]]]\\)\
+\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\"\
+Modelling studies do not suggest that increasing frequency of crop loss due \
+to extreme events, such as droughts and heavy precipitation, may overwhelm \
+positive effects of moderate temperature increase [5.4.2]. For forests, \
+elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on forestry production [5.4.2].\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Modelling studies do not \
+suggest that increasing frequency of crop loss due to extreme events, such as \
+droughts and heavy precipitation, may overwhelm positive effects of moderate \
+temperature increase [5.4.2]. For forests, elevated risks of fires, insect \
+outbreaks, wind damage and other forest-disturbance events are projected, \
+although little is known about their overall effect on forestry production \
+[5.4.2].\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"\\\\\\\"\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14, \
+Rule[StripOnInput, False]], TextForm]], \\\"InlineText\\\"], \
+Text[Style[\\\"\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14]]]\
+\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\"\
+Climate change alone is estimated to increase the number of undernourished \
+people to between 40 million and 170 million. By contrast, the impacts of \
+socio-economic development paths (SRES) can amount to several hundred million \
+people at risk of hunger [5.6.5.1]. Moreover, climate change is likely to \
+further shift the regional focus of food insecurity to sub-Saharan Africa. By \
+2070, about 75% of all people at risk of hunger are estimated to live in this \
+region. Significant benefits of mitigation to the agricultural sector may be \
+realised only in the second half of this century, i.e., once the positive CO2 \
+and water vapor effects on crop yields level off and global mean temperature \
+increases become significantly less than in non-mitigated scenarios \
+[5.6.5.1].\\\\\\\"\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], \
+14, Rule[StripOnInput, False]], TextForm]], \\\"InlineText\\\"], \
+Text[Style[\\\"Climate change alone is estimated to increase the number of \
+undernourished people to between 40 million and 170 million. By contrast, the \
+impacts of socio-economic development paths (SRES) can amount to several \
+hundred million people at risk of hunger [5.6.5.1]. Moreover, climate change \
+is likely to further shift the regional focus of food insecurity to \
+sub-Saharan Africa. By 2070, about 75% of all people at risk of hunger are \
+estimated to live in this region. Significant benefits of mitigation to the \
+agricultural sector may be realised only in the second half of this century, \
+i.e., once the positive CO2 and water vapor effects on crop yields level off \
+and global mean temperature increases become significantly less than in \
+non-mitigated scenarios [5.6.5.1].\\\", GrayLevel[0], Rule[FontFamily, \
+\\\"Helvetica\\\"], \
+14]]]\\)\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\
+\"While moderate warming benefits crop and pasture yields in mid-to \
+high-latitude regions,even slight warming decreases yields in seasonally dry \
+and low-latitude regions (medium confidence).\\\\\\\"\\\", GrayLevel[0], \
+Rule[FontFamily, \\\"Helvetica\\\"], 14, Rule[StripOnInput, False]], \
+TextForm]], \\\"InlineText\\\"], Text[Style[\\\"While moderate warming \
+benefits crop and pasture yields in mid-to high-latitude regions,even slight \
+warming decreases yields in seasonally dry and low-latitude regions (medium \
+confidence).\\\", GrayLevel[0], Rule[FontFamily, \\\"Helvetica\\\"], 14]]]\\)\
+\\n\\!\\(\\*InterpretationBox[Cell[BoxData[FormBox[StyleBox[\\\"\\\\\\\"\
+Standard Footer\\\\\\\"\\\", RGBColor[1, 0.5`, 0], 12, Rule[StripOnInput, \
+False]], TextForm]], \\\"InlineText\\\"], Text[Style[\\\"Standard Footer\\\", \
+RGBColor[1, 0.5`, 0], 12]]]\\)\\n\"\>"}], "}"}]], "Output",
+ CellChangeTimes->{3.6736005186525173`*^9, 3.673707429682394*^9, 
+  3.673709830615225*^9, 3.673716686149482*^9, 3.685021231509351*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["The Interface", "Section",
+ CellChangeTimes->{{3.67370744839058*^9, 3.673707450192177*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Button", "[", 
+  RowBox[{"\"\<New Response\>\"", ",", " ", 
+   RowBox[{"Print", "[", 
+    RowBox[{"RandomInteger", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"0", ",", "1"}], "}"}], ",", "20"}], "]"}], "]"}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.673707503921791*^9, 3.6737075518777847`*^9}}],
+
+Cell[BoxData[
+ ButtonBox["\<\"New Response\"\>",
+  Appearance->Automatic,
+  ButtonFunction:>Print[
+    RandomInteger[{0, 1}, 20]],
+  Evaluator->Automatic,
+  Method->"Preemptive"]], "Output",
+ CellChangeTimes->{{3.673707534599764*^9, 3.673707552996435*^9}, 
+   3.6737166862188396`*^9, 3.685021231575182*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Pane", "[", 
+  RowBox[{"Button", "[", 
+   RowBox[{"\"\<New Response\>\"", ",", " ", 
+    RowBox[{"Print", "[", 
+     RowBox[{"RandomInteger", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"0", ",", "1"}], "}"}], ",", "20"}], "]"}], "]"}]}], "]"}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.673707735616593*^9, 3.67370777194657*^9}}],
+
+Cell[BoxData[
+ PaneBox[
+  ButtonBox["\<\"New Response\"\>",
+   Appearance->Automatic,
+   ButtonFunction:>Print[
+     RandomInteger[{0, 1}, 20]],
+   Evaluator->Automatic,
+   Method->"Preemptive"]]], "Output",
+ CellChangeTimes->{3.673707778975463*^9, 3.6737166862677402`*^9, 
+  3.685021231636464*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"generateOutput", "[", 
+    RowBox[{
+    "response", ",", "messages", ",", " ", "mSwitches", ",", " ", 
+     "mChanges"}], "]"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"response", ",", 
+       RowBox[{"{", 
+        RowBox[{
+        "0", ",", "0", ",", "0", ",", "1", ",", "1", ",", "0", ",", "1", ",", 
+         "0", ",", "0", ",", "1", ",", "1", ",", "1", ",", "1", ",", "1", ",",
+          "1", ",", "1", ",", "0", ",", "1", ",", "1", ",", "0"}], "}"}], 
+       ",", "\"\<\>\""}], "}"}], ",", " ", 
+     RowBox[{
+      RowBox[{"Button", "[", 
+       RowBox[{"\"\<New Response\>\"", ",", " ", 
+        RowBox[{"response", "=", 
+         RowBox[{"RandomInteger", "[", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{"0", ",", "1"}], "}"}], ",", "20"}], "]"}]}]}], "]"}], 
+      "&"}]}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.6737083722320957`*^9, 3.6737084004319143`*^9}, 
+   3.673708842966107*^9, {3.6737088806270742`*^9, 3.673708924884107*^9}, {
+   3.6737089909243393`*^9, 3.673709007701803*^9}, {3.673709037800789*^9, 
+   3.673709043064309*^9}, {3.673709080018979*^9, 3.673709103003948*^9}, {
+   3.6737091789027*^9, 3.673709261546434*^9}, {3.673709425416561*^9, 
+   3.6737094751181602`*^9}, {3.673709506005513*^9, 3.673709509251431*^9}, {
+   3.673709577794015*^9, 3.673709604273725*^9}, {3.67370985696535*^9, 
+   3.6737098732026663`*^9}, {3.67370995699255*^9, 3.6737100112350073`*^9}, {
+   3.673711049476553*^9, 3.673711120014*^9}, {3.673711151155081*^9, 
+   3.6737112011684227`*^9}, {3.673711678667321*^9, 3.673711685600114*^9}, {
+   3.673711757299594*^9, 3.673711788024955*^9}, {3.6737118509474497`*^9, 
+   3.6737118780148563`*^9}, {3.6737119172507057`*^9, 3.673711959936727*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`response$$ = {0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 
+    1, 1, 1, 1, 1, 1, 0, 1, 1, 0}, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`response$$], {0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 
+       1, 1, 1, 0, 1, 1, 0}, ""}, 
+      Dynamic[
+      Button["New Response", $CellContext`response$$ = 
+        RandomInteger[{0, 1}, 20]]& ]}}, Typeset`size$$ = {
+    1156., {384.54893493652344`, 12.791915893554688`}}, Typeset`update$$ = 0, 
+    Typeset`initDone$$, Typeset`skipInitDone$$ = True}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`response$$ = {0, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+          1, 1, 1, 1, 1, 1, 0, 1, 1, 0}}, "ControllerVariables" :> {}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, 
+      "Body" :> $CellContext`generateOutput[$CellContext`response$$, \
+$CellContext`messages, $CellContext`mSwitches, $CellContext`mChanges], 
+      "Specifications" :> {{{$CellContext`response$$, {0, 0, 0, 1, 1, 0, 1, 0,
+           0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0}, ""}, 
+         Dynamic[
+         Button["New Response", $CellContext`response$$ = 
+           RandomInteger[{0, 1}, 20]]& ]}}, "Options" :> {}, 
+      "DefaultOptions" :> {}],
+     ImageSizeCache->{1201., {243., 249.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{
+  3.673708965611719*^9, 3.673709013251796*^9, 3.673709045722434*^9, 
+   3.673709268092894*^9, 3.6737094781650133`*^9, 3.673709518016932*^9, 
+   3.673709586852107*^9, 3.6737098742846746`*^9, {3.673709985415457*^9, 
+   3.673710012253285*^9}, {3.673711052378065*^9, 3.6737111008208027`*^9}, 
+   3.6737112030875196`*^9, 3.673711687631315*^9, {3.673711779569982*^9, 
+   3.673711789517663*^9}, {3.673711869517148*^9, 3.673711878799357*^9}, {
+   3.673711954689002*^9, 3.67371196108832*^9}, 3.673712125170568*^9, 
+   3.6737121715508137`*^9, 3.673716686317782*^9, 3.6850212323426933`*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["The Self-Contained interface", "Section",
+ CellChangeTimes->{{3.673712212267194*^9, 3.673712240627149*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{
+     "m1", " ", "=", " ", 
+      "\"\<Projected changes in the frequency and severity of extreme climate \
+events will have more serious consequences for food and forestry production, \
+and food insecurity, than will changes in projected means of temperature and \
+precipitation (high confidence).\>\""}], ";", "\n", 
+     RowBox[{
+     "m2", " ", "=", " ", 
+      "\"\<Modelling studies suggest that increasing frequency of crop loss \
+due to extreme events, such as droughts and heavy precipitation, may overcome \
+positive effects of moderate temperature increase [5.4.1]. For forests, \
+elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on timber production [5.4.1].\>\""}], ";", "\n", 
+     RowBox[{
+     "m3", " ", "=", " ", 
+      "\"\<Climate change increases the number of people at risk of hunger \
+(high confidence). The impact of chosen socio-economic pathways (SRES \
+scenario) on the numbers of people at risk of hunger is significantly greater \
+than the impact of climate change. Climate change will further shift the \
+focus of food insecurity to sub-Saharan Africa.\>\""}], ";", "\n", 
+     RowBox[{
+     "m4", " ", "=", " ", 
+      "\"\<Climate change alone is estimated to increase the number of \
+undernourished people to between 40 million and 170 million. By contrast, the \
+impacts of socio-economic development paths (SRES) can amount to several \
+hundred million people at risk of hunger [5.6.5]. Moreover, climate change is \
+likely to further shift the regional focus of food insecurity to sub-Saharan \
+Africa. By 2080, about 75% of all people at risk of hunger are estimated to \
+live in this region. The effects of climate mitigation measures are likely to \
+remain relatively small in the early decades; significant benefits of \
+mitigation to the agricultural sector may be realised only in the second half \
+of this century, i.e., once the positive CO2 effects on crop yields level off \
+and global mean temperature increases become significantly less than in \
+non-mitigated scenarios [5.6.5].\>\""}], ";", "\n", 
+     RowBox[{
+     "m5", " ", "=", " ", 
+      "\"\<While moderate warming benefits crop and pasture yields in mid-to \
+high-latitude regions,even slight warming decreases yields in seasonally dry \
+and low-latitude regions (medium confidence).\>\""}], ";", "\n", 
+     RowBox[{"messages", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{"m1", ",", "m2", ",", "m3", ",", "m4", ",", "m5"}], "}"}]}], 
+     ";", "\[IndentingNewLine]", "\[IndentingNewLine]", 
+     RowBox[{"m1Switches", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{
+       "1", ",", "1", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", ",", 
+        "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", 
+        "0", ",", "0", ",", "1", ",", "0", ",", "0", ",", "0"}], "}"}]}], ";",
+      "\n", 
+     RowBox[{"m2Switches", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{
+       "1", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", ",", 
+        "0", ",", "0", ",", "0", ",", "1", ",", "0", ",", "0", ",", "0", ",", 
+        "1", ",", "0", ",", "1", ",", "0", ",", "0", ",", "0"}], "}"}]}], ";",
+      "\n", 
+     RowBox[{"m3Switches", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{
+       "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", 
+        "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", 
+        "1", ",", "0", ",", "1", ",", "0", ",", "0", ",", "0"}], "}"}]}], ";",
+      "\n", 
+     RowBox[{"m4Switches", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{
+       "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "1", ",", "1", ",", 
+        "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", 
+        "1", ",", "0", ",", "1", ",", "0", ",", "0", ",", "1"}], "}"}]}], ";",
+      "\n", 
+     RowBox[{"m5Switches", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{
+       "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", 
+        "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", 
+        "0", ",", "0", ",", "0", ",", "0", ",", "1", ",", "0"}], "}"}]}], ";",
+      "\n", 
+     RowBox[{"mSwitches", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{
+       "m1Switches", ",", "m2Switches", ",", "m3Switches", ",", "m4Switches", 
+        ",", "m5Switches"}], "}"}]}], ";", "\[IndentingNewLine]", 
+     "\[IndentingNewLine]", 
+     RowBox[{"m1Changes", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"\"\<changes\>\"", ",", " ", "\"\<alterations\>\""}], "}"}], 
+        ",", " ", 
+        RowBox[{"{", 
+         RowBox[{
+         "\"\<severity of extreme climate\>\"", ",", 
+          "\"\<severity of very extreme climate\>\""}], "}"}], ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<means\>\"", ",", " ", "\"\<averages\>\""}], "}"}], ",", 
+        
+        RowBox[{"{", 
+         RowBox[{"\"\<high\>\"", ",", "\"\<medium\>\""}], "}"}]}], "}"}]}], 
+     ";", "\n", 
+     RowBox[{"m2Changes", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"\"\<Modeling\>\"", ",", " ", "\"\<Simulation\>\""}], "}"}], 
+        ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<suggest\>\"", ",", " ", "\"\<do not suggest\>\""}], 
+         "}"}], ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<overcome\>\"", ",", " ", "\"\<overwhelm\>\""}], "}"}], 
+        ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<5.4.1\>\"", ",", " ", "\"\<5.4.2\>\""}], "}"}], ",", 
+        " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<timber\>\"", ",", " ", "\"\<forestry\>\""}], "}"}]}], 
+       "}"}]}], ";", "\n", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+       RowBox[{"Note", ":", " ", 
+        RowBox[{
+        "if", " ", "the", " ", "value", " ", "of", " ", "the", " ", "second", 
+         " ", "switch", " ", "is", " ", "1"}]}], ",", " ", 
+       RowBox[{
+       "then", " ", "the", " ", "message", " ", "is", " ", "deleted"}]}], " ",
+       "*)"}], "\[IndentingNewLine]", 
+     RowBox[{"m3Changes", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"\"\<hunger\>\"", ",", " ", "\"\<extreme hunger\>\""}], 
+         "}"}], ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"m3", ",", " ", "\"\<\>\""}], "}"}]}], "}"}]}], ";", "\n", 
+     RowBox[{"m4Changes", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{
+         "\"\<between 40 million and 170 million\>\"", ",", " ", 
+          "\"\<between 80 million and 180 million\>\""}], "}"}], ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<5.6.5\>\"", ",", " ", "\"\<5.6.5.1\>\""}], "}"}], ",", 
+        " ", 
+        RowBox[{"{", 
+         RowBox[{"\"\<2080\>\"", ",", " ", "\"\<2070\>\""}], "}"}], ",", " ", 
+        
+        RowBox[{"{", 
+         RowBox[{
+         "\"\< The effects of climate mitigation measures are likely to \
+remain relatively small in the early decades; significant\>\"", ",", " ", 
+          "\"\< Significant\>\""}], "}"}], ",", 
+        RowBox[{"{", 
+         RowBox[{
+         "\"\<effects on crop yields\>\"", ",", " ", 
+          "\"\<and water vapor effects on crop yields\>\""}], "}"}]}], 
+       "}"}]}], ";", "\n", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+       RowBox[{"Note", ":", " ", 
+        RowBox[{"if", " ", "the", " ", "value", " ", "of", " ", "the", " ", 
+         RowBox[{"(", "only", ")"}], " ", "switch", " ", "is", " ", "1"}]}], 
+       ",", " ", 
+       RowBox[{
+       "then", " ", "the", " ", "message", " ", "is", " ", "deleted"}]}], " ",
+       "*)"}], "\[IndentingNewLine]", 
+     RowBox[{"m5Changes", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{"{", " ", 
+        RowBox[{"m5", ",", " ", "\"\<\>\""}], "}"}], "}"}]}], ";", "\n", 
+     RowBox[{"mChanges", " ", "=", " ", 
+      RowBox[{"{", 
+       RowBox[{
+       "m1Changes", ",", "m2Changes", ",", "m3Changes", ",", "m4Changes", ",",
+         "m5Changes"}], "}"}]}], ";", "\[IndentingNewLine]", 
+     "\[IndentingNewLine]", 
+     RowBox[{"generateOutput", "[", 
+      RowBox[{
+      "response", ",", "messages", ",", " ", "mSwitches", ",", " ", 
+       "mChanges"}], "]"}]}], ",", " ", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"response", ",", 
+        RowBox[{"{", 
+         RowBox[{
+         "0", ",", "0", ",", "0", ",", "1", ",", "1", ",", "0", ",", "1", ",",
+           "0", ",", "0", ",", "1", ",", "1", ",", "1", ",", "1", ",", "1", 
+          ",", "1", ",", "1", ",", "0", ",", "1", ",", "1", ",", "0"}], "}"}],
+         ",", "\"\<\>\""}], "}"}], ",", " ", 
+      RowBox[{
+       RowBox[{"Button", "[", 
+        RowBox[{"\"\<New Response\>\"", ",", " ", 
+         RowBox[{"response", "=", 
+          RowBox[{"RandomInteger", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"0", ",", "1"}], "}"}], ",", "20"}], "]"}]}]}], "]"}], 
+       "&"}]}], "}"}], ",", " ", 
+    RowBox[{"SaveDefinitions", "\[Rule]", "True"}]}], "]"}], 
+  "\[IndentingNewLine]"}]], "Input",
+ CellChangeTimes->{{3.6737083722320957`*^9, 3.6737084004319143`*^9}, 
+   3.673708842966107*^9, {3.6737088806270742`*^9, 3.673708924884107*^9}, {
+   3.6737089909243393`*^9, 3.673709007701803*^9}, {3.673709037800789*^9, 
+   3.673709043064309*^9}, {3.673709080018979*^9, 3.673709103003948*^9}, {
+   3.6737091789027*^9, 3.673709261546434*^9}, {3.673709425416561*^9, 
+   3.6737094751181602`*^9}, {3.673709506005513*^9, 3.673709509251431*^9}, {
+   3.673709577794015*^9, 3.673709604273725*^9}, {3.67370985696535*^9, 
+   3.6737098732026663`*^9}, {3.67370995699255*^9, 3.6737100112350073`*^9}, {
+   3.673711049476553*^9, 3.673711120014*^9}, {3.673711151155081*^9, 
+   3.6737112011684227`*^9}, {3.673711678667321*^9, 3.673711685600114*^9}, {
+   3.673711757299594*^9, 3.673711788024955*^9}, {3.6737118509474497`*^9, 
+   3.6737118780148563`*^9}, {3.6737119172507057`*^9, 3.673711959936727*^9}, {
+   3.673712378548575*^9, 3.673712418081943*^9}, {3.673712503308972*^9, 
+   3.673712518696209*^9}, {3.673712595942636*^9, 3.6737126003001957`*^9}, {
+   3.6737126572079897`*^9, 3.673712681137403*^9}, {3.673712713925898*^9, 
+   3.673712723641836*^9}, {3.673716735054537*^9, 3.673716738678989*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`response$$ = {0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 
+    1, 1, 1, 1, 1, 1, 0, 1, 1, 0}, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`response$$], {0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 
+       1, 1, 1, 0, 1, 1, 0}, ""}, 
+      Dynamic[
+      Button["New Response", $CellContext`response$$ = 
+        RandomInteger[{0, 1}, 20]]& ]}}, Typeset`size$$ = {
+    1156., {384.54893493652344`, 12.791915893554688`}}, Typeset`update$$ = 0, 
+    Typeset`initDone$$, Typeset`skipInitDone$$ = False}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`response$$ = {0, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+          1, 1, 1, 1, 1, 1, 0, 1, 1, 0}}, "ControllerVariables" :> {}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, 
+      "Body" :> ($CellContext`m1 = 
+        "Projected changes in the frequency and severity of extreme climate \
+events will have more serious consequences for food and forestry production, \
+and food insecurity, than will changes in projected means of temperature and \
+precipitation (high confidence)."; $CellContext`m2 = 
+        "Modelling studies suggest that increasing frequency of crop loss due \
+to extreme events, such as droughts and heavy precipitation, may overcome \
+positive effects of moderate temperature increase [5.4.1]. For forests, \
+elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on timber production [5.4.1]."; $CellContext`m3 = 
+        "Climate change increases the number of people at risk of hunger \
+(high confidence). The impact of chosen socio-economic pathways (SRES \
+scenario) on the numbers of people at risk of hunger is significantly greater \
+than the impact of climate change. Climate change will further shift the \
+focus of food insecurity to sub-Saharan Africa."; $CellContext`m4 = 
+        "Climate change alone is estimated to increase the number of \
+undernourished people to between 40 million and 170 million. By contrast, the \
+impacts of socio-economic development paths (SRES) can amount to several \
+hundred million people at risk of hunger [5.6.5]. Moreover, climate change is \
+likely to further shift the regional focus of food insecurity to sub-Saharan \
+Africa. By 2080, about 75% of all people at risk of hunger are estimated to \
+live in this region. The effects of climate mitigation measures are likely to \
+remain relatively small in the early decades; significant benefits of \
+mitigation to the agricultural sector may be realised only in the second half \
+of this century, i.e., once the positive CO2 effects on crop yields level off \
+and global mean temperature increases become significantly less than in \
+non-mitigated scenarios [5.6.5]."; $CellContext`m5 = 
+        "While moderate warming benefits crop and pasture yields in mid-to \
+high-latitude regions,even slight warming decreases yields in seasonally dry \
+and low-latitude regions (medium confidence)."; $CellContext`messages = \
+{$CellContext`m1, $CellContext`m2, $CellContext`m3, $CellContext`m4, \
+$CellContext`m5}; $CellContext`m1Switches = {1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 
+         0, 0, 0, 0, 0, 1, 0, 0, 0}; $CellContext`m2Switches = {1, 0, 0, 0, 0,
+          0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 
+         0}; $CellContext`m3Switches = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 1, 0, 1, 0, 0, 0}; $CellContext`m4Switches = {0, 0, 0, 0, 0, 1, 
+         1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 
+         1}; $CellContext`m5Switches = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 1, 
+         0}; $CellContext`mSwitches = {$CellContext`m1Switches, \
+$CellContext`m2Switches, $CellContext`m3Switches, $CellContext`m4Switches, \
+$CellContext`m5Switches}; $CellContext`m1Changes = {{
+          "changes", "alterations"}, {
+          "severity of extreme climate", 
+           "severity of very extreme climate"}, {"means", "averages"}, {
+          "high", "medium"}}; $CellContext`m2Changes = {{
+          "Modeling", "Simulation"}, {"suggest", "do not suggest"}, {
+          "overcome", "overwhelm"}, {"5.4.1", "5.4.2"}, {
+          "timber", "forestry"}}; $CellContext`m3Changes = {{
+          "hunger", "extreme hunger"}, {$CellContext`m3, 
+           ""}}; $CellContext`m4Changes = {{
+          "between 40 million and 170 million", 
+           "between 80 million and 180 million"}, {"5.6.5", "5.6.5.1"}, {
+          "2080", "2070"}, {
+          " The effects of climate mitigation measures are likely to remain \
+relatively small in the early decades; significant", " Significant"}, {
+          "effects on crop yields", 
+           "and water vapor effects on crop yields"}}; $CellContext`m5Changes = \
+{{$CellContext`m5, 
+           ""}}; $CellContext`mChanges = {$CellContext`m1Changes, \
+$CellContext`m2Changes, $CellContext`m3Changes, $CellContext`m4Changes, \
+$CellContext`m5Changes}; $CellContext`generateOutput[$CellContext`response$$, \
+$CellContext`messages, $CellContext`mSwitches, $CellContext`mChanges]), 
+      "Specifications" :> {{{$CellContext`response$$, {0, 0, 0, 1, 1, 0, 1, 0,
+           0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0}, ""}, 
+         Dynamic[
+         Button["New Response", $CellContext`response$$ = 
+           RandomInteger[{0, 1}, 20]]& ]}}, "Options" :> {}, 
+      "DefaultOptions" :> {}],
+     ImageSizeCache->{1201., {243., 249.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    Initialization:>({$CellContext`m1 = 
+       "Projected changes in the frequency and severity of extreme climate \
+events will have more serious consequences for food and forestry production, \
+and food insecurity, than will changes in projected means of temperature and \
+precipitation (high confidence).", $CellContext`m2 = 
+       "Modelling studies suggest that increasing frequency of crop loss due \
+to extreme events, such as droughts and heavy precipitation, may overcome \
+positive effects of moderate temperature increase [5.4.1]. For forests, \
+elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on timber production [5.4.1].", $CellContext`m3 = 
+       "Climate change increases the number of people at risk of hunger (high \
+confidence). The impact of chosen socio-economic pathways (SRES scenario) on \
+the numbers of people at risk of hunger is significantly greater than the \
+impact of climate change. Climate change will further shift the focus of food \
+insecurity to sub-Saharan Africa.", $CellContext`m4 = 
+       "Climate change alone is estimated to increase the number of \
+undernourished people to between 40 million and 170 million. By contrast, the \
+impacts of socio-economic development paths (SRES) can amount to several \
+hundred million people at risk of hunger [5.6.5]. Moreover, climate change is \
+likely to further shift the regional focus of food insecurity to sub-Saharan \
+Africa. By 2080, about 75% of all people at risk of hunger are estimated to \
+live in this region. The effects of climate mitigation measures are likely to \
+remain relatively small in the early decades; significant benefits of \
+mitigation to the agricultural sector may be realised only in the second half \
+of this century, i.e., once the positive CO2 effects on crop yields level off \
+and global mean temperature increases become significantly less than in \
+non-mitigated scenarios [5.6.5].", $CellContext`m5 = 
+       "While moderate warming benefits crop and pasture yields in mid-to \
+high-latitude regions,even slight warming decreases yields in seasonally dry \
+and low-latitude regions (medium confidence).", $CellContext`messages = {
+        "Projected changes in the frequency and severity of extreme climate \
+events will have more serious consequences for food and forestry production, \
+and food insecurity, than will changes in projected means of temperature and \
+precipitation (high confidence).", 
+         "Modelling studies suggest that increasing frequency of crop loss \
+due to extreme events, such as droughts and heavy precipitation, may overcome \
+positive effects of moderate temperature increase [5.4.1]. For forests, \
+elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on timber production [5.4.1].", 
+         "Climate change increases the number of people at risk of hunger \
+(high confidence). The impact of chosen socio-economic pathways (SRES \
+scenario) on the numbers of people at risk of hunger is significantly greater \
+than the impact of climate change. Climate change will further shift the \
+focus of food insecurity to sub-Saharan Africa.", 
+         "Climate change alone is estimated to increase the number of \
+undernourished people to between 40 million and 170 million. By contrast, the \
+impacts of socio-economic development paths (SRES) can amount to several \
+hundred million people at risk of hunger [5.6.5]. Moreover, climate change is \
+likely to further shift the regional focus of food insecurity to sub-Saharan \
+Africa. By 2080, about 75% of all people at risk of hunger are estimated to \
+live in this region. The effects of climate mitigation measures are likely to \
+remain relatively small in the early decades; significant benefits of \
+mitigation to the agricultural sector may be realised only in the second half \
+of this century, i.e., once the positive CO2 effects on crop yields level off \
+and global mean temperature increases become significantly less than in \
+non-mitigated scenarios [5.6.5].", 
+         "While moderate warming benefits crop and pasture yields in mid-to \
+high-latitude regions,even slight warming decreases yields in seasonally dry \
+and low-latitude regions (medium confidence)."}, $CellContext`m1Switches = {1,
+         1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 
+        0}, $CellContext`m2Switches = {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 
+        0, 1, 0, 1, 0, 0, 0}, $CellContext`m3Switches = {0, 0, 0, 0, 0, 0, 0, 
+        0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0}, $CellContext`m4Switches = {0, 
+        0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 
+        1}, $CellContext`m5Switches = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+        0, 0, 0, 0, 0, 1, 0}, $CellContext`mSwitches = {{1, 1, 0, 0, 0, 0, 1, 
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+         1, 0, 0, 0, 1, 0, 1, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+        0, 0, 1, 0, 1, 0, 0, 0}, {0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+         0, 1, 0, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+        0, 1, 0}}, $CellContext`m1Changes = {{"changes", "alterations"}, {
+         "severity of extreme climate", "severity of very extreme climate"}, {
+         "means", "averages"}, {
+         "high", "medium"}}, $CellContext`m2Changes = {{
+         "Modeling", "Simulation"}, {"suggest", "do not suggest"}, {
+         "overcome", "overwhelm"}, {"5.4.1", "5.4.2"}, {
+         "timber", "forestry"}}, $CellContext`m3Changes = {{
+         "hunger", "extreme hunger"}, {
+         "Climate change increases the number of people at risk of hunger \
+(high confidence). The impact of chosen socio-economic pathways (SRES \
+scenario) on the numbers of people at risk of hunger is significantly greater \
+than the impact of climate change. Climate change will further shift the \
+focus of food insecurity to sub-Saharan Africa.", 
+          ""}}, $CellContext`m4Changes = {{
+         "between 40 million and 170 million", 
+          "between 80 million and 180 million"}, {"5.6.5", "5.6.5.1"}, {
+         "2080", "2070"}, {
+         " The effects of climate mitigation measures are likely to remain \
+relatively small in the early decades; significant", " Significant"}, {
+         "effects on crop yields", 
+          "and water vapor effects on crop yields"}}, $CellContext`m5Changes = \
+{{"While moderate warming benefits crop and pasture yields in mid-to \
+high-latitude regions,even slight warming decreases yields in seasonally dry \
+and low-latitude regions (medium confidence).", 
+          ""}}, $CellContext`mChanges = {{{"changes", "alterations"}, {
+          "severity of extreme climate", 
+           "severity of very extreme climate"}, {"means", "averages"}, {
+          "high", "medium"}}, {{"Modeling", "Simulation"}, {
+          "suggest", "do not suggest"}, {"overcome", "overwhelm"}, {
+          "5.4.1", "5.4.2"}, {"timber", "forestry"}}, {{
+          "hunger", "extreme hunger"}, {
+          "Climate change increases the number of people at risk of hunger \
+(high confidence). The impact of chosen socio-economic pathways (SRES \
+scenario) on the numbers of people at risk of hunger is significantly greater \
+than the impact of climate change. Climate change will further shift the \
+focus of food insecurity to sub-Saharan Africa.", ""}}, {{
+          "between 40 million and 170 million", 
+           "between 80 million and 180 million"}, {"5.6.5", "5.6.5.1"}, {
+          "2080", "2070"}, {
+          " The effects of climate mitigation measures are likely to remain \
+relatively small in the early decades; significant", " Significant"}, {
+          "effects on crop yields", 
+           "and water vapor effects on crop yields"}}, {{
+          "While moderate warming benefits crop and pasture yields in mid-to \
+high-latitude regions,even slight warming decreases yields in seasonally dry \
+and low-latitude regions (medium confidence).", 
+           ""}}}, $CellContext`generateOutput[
+         Pattern[$CellContext`answerBits, 
+          Blank[]], 
+         Pattern[$CellContext`outputs, 
+          Blank[]], 
+         Pattern[$CellContext`switches, 
+          Blank[]], 
+         Pattern[$CellContext`changes, 
+          Blank[]]] := 
+       Module[{$CellContext`outputSwitches, $CellContext`changedOutputs, \
+$CellContext`header = Style["Conclusions", "Subtitle"], $CellContext`footer = 
+          Text[
+            Style[
+            "Standard Footer", Orange, 
+             12]], $CellContext`out}, $CellContext`outputSwitches = 
+          Map[Pick[$CellContext`answerBits, #, 
+             1]& , $CellContext`switches]; $CellContext`changedOutputs = Table[
+            $CellContext`changeOutput[
+             Part[$CellContext`outputs, $CellContext`i], 
+             Part[$CellContext`outputSwitches, $CellContext`i], 
+             Part[$CellContext`changes, $CellContext`i]], {$CellContext`i, 1, 
+             
+             Length[$CellContext`outputs]}]; $CellContext`out = Prepend[
+            Append[
+             
+             Prepend[$CellContext`changedOutputs, $CellContext`header], \
+$CellContext`footer], 
+            StringJoin["Response = ", 
+             ToString[$CellContext`answerBits], "\n"]]; Fold[StringJoin, 
+           Map[StringJoin[
+             ToString[#, StandardForm], 
+             "\n"]& , $CellContext`out]]], $CellContext`outputs = {
+        "Projected changes in the frequency and severity of extreme climate \
+events will have more serious consequences for food and forestry production, \
+and food insecurity, than will changes in projected means of temperature and \
+precipitation (high confidence).", 
+         "Modelling studies suggest that increasing frequency of crop loss \
+due to extreme events, such as droughts and heavy precipitation, may overcome \
+positive effects of moderate temperature increase [5.4.1]. For forests, \
+elevated risks of fires, insect outbreaks, wind damage and other \
+forest-disturbance events are projected, although little is known about their \
+overall effect on timber production [5.4.1].", 
+         "Climate change increases the number of people at risk of hunger \
+(high confidence). The impact of chosen socio-economic pathways (SRES \
+scenario) on the numbers of people at risk of hunger is significantly greater \
+than the impact of climate change. Climate change will further shift the \
+focus of food insecurity to sub-Saharan Africa.", 
+         "Climate change alone is estimated to increase the number of \
+undernourished people to between 40 million and 170 million. By contrast, the \
+impacts of socio-economic development paths (SRES) can amount to several \
+hundred million people at risk of hunger [5.6.5]. Moreover, climate change is \
+likely to further shift the regional focus of food insecurity to sub-Saharan \
+Africa. By 2080, about 75% of all people at risk of hunger are estimated to \
+live in this region. The effects of climate mitigation measures are likely to \
+remain relatively small in the early decades; significant benefits of \
+mitigation to the agricultural sector may be realised only in the second half \
+of this century, i.e., once the positive CO2 effects on crop yields level off \
+and global mean temperature increases become significantly less than in \
+non-mitigated scenarios [5.6.5].", 
+         "While moderate warming benefits crop and pasture yields in mid-to \
+high-latitude regions,even slight warming decreases yields in seasonally dry \
+and low-latitude regions (medium confidence)."}, $CellContext`changeOutput[
+         Pattern[$CellContext`output, 
+          Blank[]], 
+         Pattern[$CellContext`switches, 
+          Blank[]], 
+         Pattern[$CellContext`changes, 
+          Blank[]]] := 
+       Module[{$CellContext`trans}, 
+         If[Length[$CellContext`switches] != Length[$CellContext`changes], 
+           Return[
+            StringJoin[
+            "Please make sure the number of changes is equal to the number of \
+switches and try again. The output you're trying to change is:\n\n", \
+$CellContext`output]]]; $CellContext`trans = ReplaceAll[
+            Table[
+             If[
+             Part[$CellContext`switches, $CellContext`i] == 1, 
+              Part[$CellContext`changes, $CellContext`i, 1] -> 
+              Part[$CellContext`changes, $CellContext`i, 2]], {$CellContext`i,
+               1, 
+              Length[$CellContext`switches]}], Null -> Sequence[]]; Text[
+           Style[
+            StringReplace[$CellContext`output, $CellContext`trans], Black, 
+            FontFamily -> "Helvetica", 14]]]}; Typeset`initDone$$ = True),
+    SynchronousInitialization->True,
+    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{3.6737124442777853`*^9, 3.673712521978401*^9, 
+  3.6737126112926903`*^9, 3.673712668230303*^9, 3.673712730196382*^9, 
+  3.673716686500896*^9, 3.673716743210519*^9, 3.685021232533041*^9}]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1136, 845},
+WindowMargins->{{1, Automatic}, {Automatic, 0}},
+FrontEndVersion->"11.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (July 28, \
+2016)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 96, 1, 64, "Section"],
+Cell[679, 25, 986, 18, 144, "Text"],
+Cell[1668, 45, 488, 8, 49, "Text"],
+Cell[CellGroupData[{
+Cell[2181, 57, 116, 2, 32, "Input"],
+Cell[2300, 61, 145, 2, 32, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2482, 68, 118, 2, 32, "Input"],
+Cell[2603, 72, 150, 2, 32, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2802, 80, 97, 1, 64, "Section"],
+Cell[2902, 83, 440, 7, 49, "Text"],
+Cell[3345, 92, 194, 4, 32, "Input"],
+Cell[CellGroupData[{
+Cell[3564, 100, 183, 3, 32, "Input"],
+Cell[3750, 105, 194, 3, 32, "Output"]
+}, Open  ]],
+Cell[3959, 111, 265, 5, 32, "Input"],
+Cell[CellGroupData[{
+Cell[4249, 120, 220, 4, 32, "Input"],
+Cell[4472, 126, 421, 8, 32, "Output"]
+}, Open  ]],
+Cell[4908, 137, 231, 5, 32, "Input"],
+Cell[CellGroupData[{
+Cell[5164, 146, 242, 6, 32, "Input"],
+Cell[5409, 154, 427, 8, 32, "Output"]
+}, Open  ]],
+Cell[5851, 165, 483, 13, 54, "Input"],
+Cell[CellGroupData[{
+Cell[6359, 182, 781, 18, 54, "Input"],
+Cell[7143, 202, 258, 5, 32, "Output"]
+}, Open  ]],
+Cell[7416, 210, 385, 8, 32, "Input"],
+Cell[7804, 220, 758, 18, 32, "Input"],
+Cell[CellGroupData[{
+Cell[8587, 242, 174, 4, 32, "Input"],
+Cell[8764, 248, 174, 2, 32, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8975, 255, 1091, 26, 32, "Input"],
+Cell[10069, 283, 332, 7, 24, "Message"],
+Cell[10404, 292, 610, 11, 32, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[11051, 308, 814, 23, 32, "Input"],
+Cell[11868, 333, 242, 4, 32, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[12147, 342, 198, 4, 32, "Input"],
+Cell[12348, 348, 196, 3, 32, "Output"]
+}, Open  ]],
+Cell[12559, 354, 751, 21, 54, "Input"],
+Cell[13313, 377, 419, 8, 75, "Input"],
+Cell[CellGroupData[{
+Cell[13757, 389, 96, 1, 32, "Input"],
+Cell[13856, 392, 409, 5, 54, "Output"]
+}, Open  ]],
+Cell[14280, 400, 570, 10, 96, "Input"],
+Cell[14853, 412, 523, 11, 117, "Input"],
+Cell[CellGroupData[{
+Cell[15401, 427, 1007, 14, 180, "Input"],
+Cell[16411, 443, 1020, 13, 138, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[17468, 461, 330, 5, 75, "Input"],
+Cell[17801, 468, 340, 4, 54, "Output"]
+}, Open  ]],
+Cell[18156, 475, 238, 6, 32, "Input"],
+Cell[CellGroupData[{
+Cell[18419, 485, 561, 12, 32, "Input"],
+Cell[18983, 499, 228, 4, 32, "Output"]
+}, Open  ]],
+Cell[19226, 506, 1016, 23, 32, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[20279, 534, 95, 1, 64, "Section"],
+Cell[20377, 537, 3536, 78, 222, "Input"],
+Cell[CellGroupData[{
+Cell[23938, 619, 397, 7, 32, "Input"],
+Cell[24338, 628, 1319, 26, 53, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[25694, 659, 463, 10, 32, "Input"],
+Cell[26160, 671, 218, 4, 32, "Output"]
+}, Open  ]],
+Cell[26393, 678, 764, 20, 32, "Input"],
+Cell[CellGroupData[{
+Cell[27182, 702, 182, 3, 32, "Input"],
+Cell[27367, 707, 1377, 26, 71, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[28793, 739, 95, 1, 64, "Section"],
+Cell[28891, 742, 6372, 137, 453, "Input"],
+Cell[CellGroupData[{
+Cell[35288, 883, 243, 6, 32, "Input"],
+Cell[35534, 891, 429, 5, 75, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[36000, 901, 141, 2, 32, "Input"],
+Cell[36144, 905, 166, 2, 32, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[36347, 912, 989, 23, 54, "Input"],
+Cell[37339, 937, 3362, 46, 235, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[40750, 989, 102, 1, 64, "Section"],
+Cell[CellGroupData[{
+Cell[40877, 994, 101, 1, 44, "Subsection"],
+Cell[40981, 997, 1286, 21, 227, "Subsubsection"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[42304, 1023, 173, 2, 44, "Subsection"],
+Cell[42480, 1027, 283, 5, 83, "Subsubsection"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[42800, 1037, 166, 2, 44, "Subsection"],
+Cell[CellGroupData[{
+Cell[42991, 1043, 358, 6, 59, "Subsubsection"],
+Cell[43352, 1051, 470, 9, 96, "Input"],
+Cell[43825, 1062, 619, 11, 117, "Input"],
+Cell[44447, 1075, 574, 10, 117, "Input"],
+Cell[45024, 1087, 1099, 17, 222, "Input"],
+Cell[46126, 1106, 428, 8, 75, "Input"],
+Cell[46557, 1116, 238, 6, 32, "Input"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[46844, 1128, 180, 2, 44, "Subsection"],
+Cell[CellGroupData[{
+Cell[47049, 1134, 294, 5, 35, "Subsubsection"],
+Cell[47346, 1141, 401, 9, 32, "Input"],
+Cell[47750, 1152, 401, 9, 32, "Input"],
+Cell[48154, 1163, 405, 9, 32, "Input"],
+Cell[48562, 1174, 403, 9, 32, "Input"],
+Cell[48968, 1185, 452, 10, 32, "Input"],
+Cell[49423, 1197, 290, 7, 32, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[49750, 1209, 108, 1, 35, "Subsubsection"],
+Cell[49861, 1212, 634, 17, 32, "Input"],
+Cell[50498, 1231, 717, 19, 32, "Input"],
+Cell[51218, 1252, 824, 22, 54, "Input"],
+Cell[52045, 1276, 981, 24, 75, "Input"],
+Cell[53029, 1302, 858, 20, 54, "Input"],
+Cell[53890, 1324, 282, 7, 32, "Input"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[54233, 1338, 91, 1, 64, "Section"],
+Cell[CellGroupData[{
+Cell[54349, 1343, 252, 6, 32, "Input"],
+Cell[54604, 1351, 424, 8, 32, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[55065, 1364, 276, 6, 32, "Input"],
+Cell[55344, 1372, 6653, 89, 414, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[62034, 1466, 820, 24, 32, "Input"],
+Cell[62857, 1492, 17133, 232, 1143, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[80039, 1730, 97, 1, 64, "Section"],
+Cell[CellGroupData[{
+Cell[80161, 1735, 334, 9, 32, "Input"],
+Cell[80498, 1746, 306, 8, 43, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[80841, 1759, 368, 10, 32, "Input"],
+Cell[81212, 1771, 298, 9, 44, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[81547, 1785, 1813, 37, 54, "Input"],
+Cell[83363, 1824, 2698, 51, 509, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[86110, 1881, 113, 1, 64, "Section"],
+Cell[CellGroupData[{
+Cell[86248, 1886, 10447, 223, 978, "Input"],
+Cell[96698, 2111, 19275, 310, 509, "Output"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
